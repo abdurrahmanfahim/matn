@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 
-export default function TopBar({ onOpenGuide, onLoadSample, onFileUpload, onPrint }) {
+export default function TopBar({ onOpenGuide, onLoadSample, onFileUpload, onPrint, onOpenJsonImport, onOpenPromptBuilder }) {
   const fileRef = useRef(null);
 
   return (
@@ -12,6 +12,8 @@ export default function TopBar({ onOpenGuide, onLoadSample, onFileUpload, onPrin
       <div className="topbar-spacer" />
       <div className="top-actions">
         <button className="btn" onClick={onOpenGuide}>صيغة النص</button>
+        <button className="btn" onClick={onOpenPromptBuilder}>إنشاء عبر AI</button>
+        <button className="btn" onClick={onOpenJsonImport}>استيراد JSON</button>
         <button className="btn" onClick={onLoadSample}>نص تجريبي</button>
         <label className="btn" onClick={() => fileRef.current?.click()}>رفع ملف</label>
         <input

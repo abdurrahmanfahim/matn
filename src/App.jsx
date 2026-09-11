@@ -3,6 +3,8 @@ import TopBar from './components/TopBar';
 import Rail from './components/Rail';
 import BookPreview from './components/BookPreview';
 import GuideModal from './components/GuideModal';
+import JsonImportModal from './components/JsonImportModal';
+import PromptBuilderModal from './components/PromptBuilderModal';
 import { SAMPLE } from './lib/sample';
 import './App.css';
 
@@ -36,6 +38,8 @@ export default function App() {
   const [termMode, setTermMode] = useState(initial.settings.termMode);
   const [pageSize, setPageSize] = useState(initial.settings.pageSize);
   const [guideOpen, setGuideOpen] = useState(false);
+  const [jsonImportOpen, setJsonImportOpen] = useState(false);
+  const [promptBuilderOpen, setPromptBuilderOpen] = useState(false);
 
   useEffect(() => {
     try {
@@ -67,6 +71,13 @@ export default function App() {
 
   const handlePrint = useCallback(() => window.print(), []);
   const handleLoadSample = useCallback(() => setText(SAMPLE), []);
+  const handleJsonApply = useCallback((md, applyMode) => {
+    if (applyMode === 'replace') {
+      setText(md);
+    } else {
+      setText((prev) => (prev.trim() ? prev.replace(/\s*$/, '') + '\n\n' + md : md));
+    }
+  }, []);
 
   return (
     <div className="app-shell">
@@ -75,6 +86,8 @@ export default function App() {
         onLoadSample={handleLoadSample}
         onFileUpload={setText}
         onPrint={handlePrint}
+        onOpenJsonImport={() => setJsonImportOpen(true)}
+        onOpenPromptBuilder={() => setPromptBuilderOpen(true)}
       />
       <div className="workspace">
         <Rail
@@ -107,6 +120,12 @@ export default function App() {
         </div>
       </div>
       <GuideModal open={guideOpen} onClose={() => setGuideOpen(false)} />
+      <JsonImportModal
+        open={jsonImportOpen}
+        onClose={() => setJsonImportOpen(false)}
+        onApply={handleJsonApply}
+      />
+      <PromptBuilderModal open={promptBuilderOpen} onClose={() => setPromptBuilderOpen(false)} />
     </div>
   );
 }
