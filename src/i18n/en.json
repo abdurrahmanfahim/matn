@@ -1,0 +1,66 @@
+{
+  "brand": { "mark": "Warraq", "tagline": "From Text to Book" },
+  "topbar": {
+    "guide": "Text Format",
+    "promptBuilder": "Create via AI",
+    "jsonImport": "Import JSON",
+    "sample": "Sample Text",
+    "upload": "Upload File",
+    "print": "Export PDF"
+  },
+  "rail": {
+    "formatting": "Formatting",
+    "direction": "Direction",
+    "numerals": "Numerals",
+    "pageSize": "Page Size",
+    "termHighlight": "Term Highlight",
+    "auto": "Auto",
+    "off": "Off",
+    "pageSizeA5": "A5 (small book)",
+    "pageSizeA4": "A4",
+    "pageSizeLetter": "Letter",
+    "language": "Language"
+  },
+  "themes": {
+    "emerald": "Emerald — Naskh",
+    "scheherazade": "Scheherazade — Classic",
+    "sans": "Modern — Plain",
+    "sepia": "Sepia — Amiri"
+  },
+  "editor": {
+    "label": "Source Text (Markdown)"
+  },
+  "guide": {
+    "title": "Text Format",
+    "intro": "Write your book in simplified Markdown. These are the elements Warraq understands:",
+    "frontmatterTitle": "Header (optional)",
+    "chapterTitle": "Main chapter (colored box)",
+    "subTitle": "Numbered sub-heading (auto-numbered inside the chapter)",
+    "verseTitle": "Poetry / verse box",
+    "termTitle": "Term highlighting",
+    "termBody": "Any paragraph that begins with a word or phrase followed by a colon \":\" has the part before the colon highlighted automatically — or use **Term:** manually.",
+    "paraTitle": "Regular paragraph",
+    "paraBody": "Any plain line with no symbol in front of it is treated as a normal paragraph."
+  },
+  "jsonImport": {
+    "title": "Import JSON",
+    "newBook": "New book (replace)",
+    "addChapter": "Add chapter (append)",
+    "newBookDesc": "Paste JSON here in the full book format (title, subtitle, chapters) — this will replace the entire editor content.",
+    "addChapterDesc": "Paste JSON here for one chapter or an array of chapters — it will be added to the end of the current book without deleting anything.",
+    "applyNew": "Create Book",
+    "applyAppend": "Add to Book",
+    "parseError": "Couldn't read the JSON — check the syntax.",
+    "successNew": "Book created from JSON successfully.",
+    "successAppend": "Chapter(s) added successfully."
+  },
+  "promptBuilder": {
+    "title": "Create via AI",
+    "intro": "Copy this prompt and paste it into any AI chat tool (ChatGPT, Gemini, Claude...) along with your raw book text at the end. Then paste the resulting JSON into the \"Import JSON\" window.",
+    "forNewBook": "For a new book",
+    "forChapter": "For adding a chapter",
+    "copy": "Copy Prompt",
+    "copied": "Copied ✓"
+  },
+  "close": "Close"
+}

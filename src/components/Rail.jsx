@@ -1,5 +1,7 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { THEMES } from '../lib/themes';
+import { setLanguage } from '../i18n';
 
 function TogglePair({ options, value, onChange }) {
   return (
@@ -24,30 +26,41 @@ export default function Rail({
   termMode, setTermMode,
   pageSize, setPageSize,
 }) {
+  const { t, i18n } = useTranslation();
+
   return (
     <div className="rail">
       <div className="rail-section">
-        <h3>التنسيق</h3>
+        <h3>{t('rail.language')}</h3>
+        <TogglePair
+          value={i18n.language}
+          onChange={setLanguage}
+          options={[{ value: 'en', label: 'English' }, { value: 'ar', label: 'العربية' }]}
+        />
+      </div>
+
+      <div className="rail-section">
+        <h3>{t('rail.formatting')}</h3>
         <div className="theme-grid">
-          {Object.entries(THEMES).map(([key, t]) => (
+          {Object.entries(THEMES).map(([key, th]) => (
             <div
               key={key}
               className={`theme-chip ${theme === key ? 'active' : ''}`}
               onClick={() => setTheme(key)}
             >
               <div className="swatch">
-                {t.swatch.map((c, i) => (
+                {th.swatch.map((c, i) => (
                   <span key={i} style={{ background: c }} />
                 ))}
               </div>
-              <div className="name">{t.name}</div>
+              <div className="name">{t(`themes.${key}`)}</div>
             </div>
           ))}
         </div>
       </div>
 
       <div className="rail-section">
-        <h3>الاتجاه</h3>
+        <h3>{t('rail.direction')}</h3>
         <TogglePair
           value={dir}
           onChange={setDir}
@@ -56,7 +69,7 @@ export default function Rail({
       </div>
 
       <div className="rail-section">
-        <h3>الأرقام</h3>
+        <h3>{t('rail.numerals')}</h3>
         <TogglePair
           value={numerals}
           onChange={setNumerals}
@@ -65,20 +78,20 @@ export default function Rail({
       </div>
 
       <div className="rail-section">
-        <h3>حجم الصفحة</h3>
+        <h3>{t('rail.pageSize')}</h3>
         <select value={pageSize} onChange={(e) => setPageSize(e.target.value)}>
-          <option value="A5">A5 (كتاب صغير)</option>
-          <option value="A4">A4</option>
-          <option value="Letter">Letter</option>
+          <option value="A5">{t('rail.pageSizeA5')}</option>
+          <option value="A4">{t('rail.pageSizeA4')}</option>
+          <option value="Letter">{t('rail.pageSizeLetter')}</option>
         </select>
       </div>
 
       <div className="rail-section">
-        <h3>تمييز المصطلحات</h3>
+        <h3>{t('rail.termHighlight')}</h3>
         <TogglePair
           value={termMode}
           onChange={setTermMode}
-          options={[{ value: 'auto', label: 'تلقائي' }, { value: 'off', label: 'إيقاف' }]}
+          options={[{ value: 'auto', label: t('rail.auto') }, { value: 'off', label: t('rail.off') }]}
         />
       </div>
     </div>

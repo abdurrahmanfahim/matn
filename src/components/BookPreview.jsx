@@ -26,7 +26,6 @@ export default function BookPreview({ rawText, theme, dir, numerals, termMode, p
     '--term-color': t.termColor,
     '--dot-color': t.dotColor,
     '--font-head': t.fontHead,
-    '--side-prop': dir === 'rtl' ? 'right' : 'left',
   };
 
   return (
@@ -40,7 +39,7 @@ export default function BookPreview({ rawText, theme, dir, numerals, termMode, p
 
       {doc.toc.length > 0 && (
         <div className="bk-toc">
-          <div className="bk-toc-title">الفهرس</div>
+          <div className="bk-toc-title">{dir === 'rtl' ? 'الفهرس' : 'Table of Contents'}</div>
           {doc.toc.map((e) => (
             <div key={e.id} className={`bk-toc-entry ${e.level === 'main' ? 'main' : 'sub'}`}>
               <a href={`#${e.id}`}>{e.text}</a>

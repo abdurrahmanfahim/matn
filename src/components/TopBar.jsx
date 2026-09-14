@@ -1,21 +1,29 @@
 import React, { useRef } from 'react';
+import { useTranslation } from 'react-i18next';
+import { setLanguage } from '../i18n';
 
 export default function TopBar({ onOpenGuide, onLoadSample, onFileUpload, onPrint, onOpenJsonImport, onOpenPromptBuilder }) {
   const fileRef = useRef(null);
+  const { t, i18n } = useTranslation();
+  const otherLang = i18n.language === 'ar' ? 'en' : 'ar';
+  const otherLangLabel = otherLang === 'ar' ? 'العربية' : 'English';
 
   return (
     <div className="topbar">
       <div className="brand">
-        <span className="mark">وَرّاق</span>
-        <span className="tagline">من نص إلى كتاب</span>
+        <span className="mark">{t('brand.mark')}</span>
+        <span className="tagline">{t('brand.tagline')}</span>
       </div>
+      <button className="btn lang-btn mobile-only" onClick={() => setLanguage(otherLang)}>
+        {otherLangLabel}
+      </button>
       <div className="topbar-spacer" />
       <div className="top-actions">
-        <button className="btn" onClick={onOpenGuide}>صيغة النص</button>
-        <button className="btn" onClick={onOpenPromptBuilder}>إنشاء عبر AI</button>
-        <button className="btn" onClick={onOpenJsonImport}>استيراد JSON</button>
-        <button className="btn" onClick={onLoadSample}>نص تجريبي</button>
-        <label className="btn" onClick={() => fileRef.current?.click()}>رفع ملف</label>
+        <button className="btn" onClick={onOpenGuide}>{t('topbar.guide')}</button>
+        <button className="btn" onClick={onOpenPromptBuilder}>{t('topbar.promptBuilder')}</button>
+        <button className="btn" onClick={onOpenJsonImport}>{t('topbar.jsonImport')}</button>
+        <button className="btn" onClick={onLoadSample}>{t('topbar.sample')}</button>
+        <label className="btn" onClick={() => fileRef.current?.click()}>{t('topbar.upload')}</label>
         <input
           ref={fileRef}
           type="file"
@@ -30,7 +38,7 @@ export default function TopBar({ onOpenGuide, onLoadSample, onFileUpload, onPrin
             e.target.value = '';
           }}
         />
-        <button className="btn primary" onClick={onPrint}>تصدير PDF</button>
+        <button className="btn primary" onClick={onPrint}>{t('topbar.print')}</button>
       </div>
     </div>
   );

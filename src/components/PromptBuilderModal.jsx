@@ -1,7 +1,9 @@
 import React, { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { buildPrompt } from '../lib/promptBuilder';
 
 export default function PromptBuilderModal({ open, onClose }) {
+  const { t } = useTranslation();
   const [mode, setMode] = useState('new'); // 'new' | 'chapter'
   const [copied, setCopied] = useState(false);
   const prompt = useMemo(() => buildPrompt(mode), [mode]);
@@ -25,21 +27,18 @@ export default function PromptBuilderModal({ open, onClose }) {
     >
       <div className="modal">
         <div className="modal-header">
-          <h2>إنشاء عبر الذكاء الاصطناعي</h2>
-          <button className="btn" onClick={onClose}>إغلاق</button>
+          <h2>{t('promptBuilder.title')}</h2>
+          <button className="btn" onClick={onClose}>{t('close')}</button>
         </div>
 
-        <p>
-          انسخ هذا الطلب، والصقه في أي أداة ذكاء اصطناعي (ChatGPT، Gemini، Claude...) مع نص
-          كتابك الخام في آخره. ثم الصق الناتج (JSON) في نافذة «استيراد JSON».
-        </p>
+        <p>{t('promptBuilder.intro')}</p>
 
         <div className="toggle-pair" style={{ marginBottom: 16 }}>
           <button className={mode === 'new' ? 'active' : ''} onClick={() => setMode('new')}>
-            لكتاب جديد
+            {t('promptBuilder.forNewBook')}
           </button>
           <button className={mode === 'chapter' ? 'active' : ''} onClick={() => setMode('chapter')}>
-            لإضافة فصل
+            {t('promptBuilder.forChapter')}
           </button>
         </div>
 
@@ -48,7 +47,7 @@ export default function PromptBuilderModal({ open, onClose }) {
         </pre>
 
         <button className="btn primary" onClick={handleCopy}>
-          {copied ? 'تم النسخ ✓' : 'نسخ الطلب'}
+          {copied ? t('promptBuilder.copied') : t('promptBuilder.copy')}
         </button>
       </div>
     </div>

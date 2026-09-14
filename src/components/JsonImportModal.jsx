@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { bookJsonToMarkdown, chapterJsonToMarkdown } from '../lib/jsonSchema';
 
 export default function JsonImportModal({ open, onClose, onApply }) {
+  const { t } = useTranslation();
   const [mode, setMode] = useState('new'); // 'new' | 'chapter'
   const [raw, setRaw] = useState('');
   const [error, setError] = useState('');
@@ -16,18 +18,18 @@ export default function JsonImportModal({ open, onClose, onApply }) {
     try {
       parsed = JSON.parse(raw);
     } catch (e) {
-      setError('تعذّر قراءة JSON — تأكّد من صحة الصيغة. (' + e.message + ')');
+      setError(t('jsonImport.parseError') + ' (' + e.message + ')');
       return;
     }
     try {
       if (mode === 'new') {
         const md = bookJsonToMarkdown(parsed);
         onApply(md, 'replace');
-        setOk('تم إنشاء الكتاب من الـ JSON بنجاح.');
+        setOk(t('jsonImport.successNew'));
       } else {
         const md = chapterJsonToMarkdown(parsed);
         onApply(md, 'append');
-        setOk('تمت إضافة الفصل/الفصول بنجاح.');
+        setOk(t('jsonImport.successAppend'));
       }
       setRaw('');
     } catch (e) {
@@ -42,24 +44,20 @@ export default function JsonImportModal({ open, onClose, onApply }) {
     >
       <div className="modal">
         <div className="modal-header">
-          <h2>استيراد JSON</h2>
-          <button className="btn" onClick={onClose}>إغلاق</button>
+          <h2>{t('jsonImport.title')}</h2>
+          <button className="btn" onClick={onClose}>{t('close')}</button>
         </div>
 
         <div className="toggle-pair" style={{ marginBottom: 16 }}>
           <button className={mode === 'new' ? 'active' : ''} onClick={() => setMode('new')}>
-            كتاب جديد (استبدال)
+            {t('jsonImport.newBook')}
           </button>
           <button className={mode === 'chapter' ? 'active' : ''} onClick={() => setMode('chapter')}>
-            إضافة فصل (إلحاق)
+            {t('jsonImport.addChapter')}
           </button>
         </div>
 
-        <p>
-          {mode === 'new'
-            ? 'الصق هنا JSON بالصيغة الكاملة للكتاب (title, subtitle, chapters) — سيستبدل هذا محتوى المحرّر بالكامل.'
-            : 'الصق هنا JSON لفصل واحد أو مصفوفة فصول — ستُضاف إلى نهاية الكتاب الحالي دون حذف أي شيء.'}
-        </p>
+        <p>{mode === 'new' ? t('jsonImport.newBookDesc') : t('jsonImport.addChapterDesc')}</p>
 
         <textarea
           value={raw}
@@ -78,7 +76,7 @@ export default function JsonImportModal({ open, onClose, onApply }) {
         {ok && <p style={{ color: '#7fae7a' }}>{ok}</p>}
 
         <button className="btn primary" onClick={handleApply}>
-          {mode === 'new' ? 'إنشاء الكتاب' : 'إضافة إلى الكتاب'}
+          {mode === 'new' ? t('jsonImport.applyNew') : t('jsonImport.applyAppend')}
         </button>
       </div>
     </div>

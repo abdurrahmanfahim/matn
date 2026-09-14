@@ -1,35 +1,49 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import TopBar from './components/TopBar';
 import Rail from './components/Rail';
 import BookPreview from './components/BookPreview';
 import GuideModal from './components/GuideModal';
 import JsonImportModal from './components/JsonImportModal';
 import PromptBuilderModal from './components/PromptBuilderModal';
-import { SAMPLE } from './lib/sample';
+import { SAMPLE_AR, SAMPLE_EN } from './lib/sample';
 import './App.css';
 
-const DEFAULT_STATE = {
-  theme: 'emerald',
-  dir: 'rtl',
-  numerals: 'arabic',
-  termMode: 'auto',
-  pageSize: 'A5',
-};
+function detectLang() {
+  try {
+    const saved = localStorage.getItem('warraq_lang');
+    if (saved === 'ar' || saved === 'en') return saved;
+  } catch (e) { /* ignore */ }
+  return 'en';
+}
+
+function defaultStateFor(lang) {
+  return {
+    theme: 'emerald',
+    dir: lang === 'ar' ? 'rtl' : 'ltr',
+    numerals: lang === 'ar' ? 'arabic' : 'latin',
+    termMode: 'auto',
+    pageSize: 'A5',
+  };
+}
 
 function loadInitial() {
+  const lang = detectLang();
+  const DEFAULT_STATE = defaultStateFor(lang);
   try {
     const savedState = localStorage.getItem('warraq_state');
     const savedDraft = localStorage.getItem('warraq_draft');
     return {
       settings: savedState ? { ...DEFAULT_STATE, ...JSON.parse(savedState) } : DEFAULT_STATE,
-      text: savedDraft || SAMPLE,
+      text: savedDraft || (lang === 'ar' ? SAMPLE_AR : SAMPLE_EN),
     };
   } catch (e) {
-    return { settings: DEFAULT_STATE, text: SAMPLE };
+    return { settings: DEFAULT_STATE, text: lang === 'ar' ? SAMPLE_AR : SAMPLE_EN };
   }
 }
 
 export default function App() {
+  const { t, i18n } = useTranslation();
   const initial = loadInitial();
   const [text, setText] = useState(initial.text);
   const [theme, setTheme] = useState(initial.settings.theme);
@@ -70,7 +84,9 @@ export default function App() {
   }, [pageSize]);
 
   const handlePrint = useCallback(() => window.print(), []);
-  const handleLoadSample = useCallback(() => setText(SAMPLE), []);
+  const handleLoadSample = useCallback(() => {
+    setText(i18n.language === 'ar' ? SAMPLE_AR : SAMPLE_EN);
+  }, [i18n.language]);
   const handleJsonApply = useCallback((md, applyMode) => {
     if (applyMode === 'replace') {
       setText(md);
@@ -99,12 +115,14 @@ export default function App() {
         />
         <div className="panes">
           <div className="editor-pane">
-            <div className="pane-label">النص المصدر (Markdown)</div>
+            <div className="pane-label">{t('editor.label')}</div>
             <textarea
               id="editor"
               spellCheck={false}
               value={text}
               onChange={(e) => setText(e.target.value)}
+              dir={dir}
+              style={{ textAlign: dir === 'rtl' ? 'right' : 'left' }}
             />
           </div>
           <div className="preview-pane">
