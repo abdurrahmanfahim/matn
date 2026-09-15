@@ -54,6 +54,7 @@ export default function App() {
   const [guideOpen, setGuideOpen] = useState(false);
   const [jsonImportOpen, setJsonImportOpen] = useState(false);
   const [promptBuilderOpen, setPromptBuilderOpen] = useState(false);
+  const [railOpen, setRailOpen] = useState(false);
 
   useEffect(() => {
     try {
@@ -71,6 +72,18 @@ export default function App() {
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js').catch(() => {});
     }
+  }, []);
+
+  useEffect(() => {
+    const handleKey = (e) => {
+      if (e.key !== 'Escape') return;
+      setGuideOpen(false);
+      setJsonImportOpen(false);
+      setPromptBuilderOpen(false);
+      setRailOpen(false);
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
   }, []);
 
   useEffect(() => {
@@ -94,6 +107,22 @@ export default function App() {
       setText((prev) => (prev.trim() ? prev.replace(/\s*$/, '') + '\n\n' + md : md));
     }
   }, []);
+  const handleDownloadMd = useCallback(() => {
+    const blob = new Blob([text], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'book.md';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, [text]);
+  const handleClear = useCallback(() => {
+    if (window.confirm(t('topbar.clearConfirm'))) {
+      setText('');
+    }
+  }, [t]);
 
   return (
     <div className="app-shell">
@@ -104,14 +133,20 @@ export default function App() {
         onPrint={handlePrint}
         onOpenJsonImport={() => setJsonImportOpen(true)}
         onOpenPromptBuilder={() => setPromptBuilderOpen(true)}
+        onDownloadMd={handleDownloadMd}
+        onClear={handleClear}
+        onOpenSettings={() => setRailOpen(true)}
       />
       <div className="workspace">
+        {railOpen && <div className="rail-backdrop" onClick={() => setRailOpen(false)} />}
         <Rail
           theme={theme} setTheme={setTheme}
           dir={dir} setDir={setDir}
           numerals={numerals} setNumerals={setNumerals}
           termMode={termMode} setTermMode={setTermMode}
           pageSize={pageSize} setPageSize={setPageSize}
+          mobileOpen={railOpen}
+          onClose={() => setRailOpen(false)}
         />
         <div className="panes">
           <div className="editor-pane">

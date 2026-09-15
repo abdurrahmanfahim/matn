@@ -6,6 +6,9 @@
     "jsonImport": "Import JSON",
     "sample": "Sample Text",
     "upload": "Upload File",
+    "downloadMd": "Download .md",
+    "clear": "Clear",
+    "clearConfirm": "Clear the whole editor and start over? This cannot be undone.",
     "print": "Export PDF"
   },
   "rail": {
@@ -28,7 +31,8 @@
     "sepia": "Sepia — Amiri"
   },
   "editor": {
-    "label": "Source Text (Markdown)"
+    "label": "Source Text (Markdown)",
+    "empty": "Start typing in the editor to see your book take shape here."
   },
   "guide": {
     "title": "Text Format",

@@ -2,7 +2,10 @@ import React, { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { setLanguage } from '../i18n';
 
-export default function TopBar({ onOpenGuide, onLoadSample, onFileUpload, onPrint, onOpenJsonImport, onOpenPromptBuilder }) {
+export default function TopBar({
+  onOpenGuide, onLoadSample, onFileUpload, onPrint,
+  onOpenJsonImport, onOpenPromptBuilder, onDownloadMd, onClear, onOpenSettings,
+}) {
   const fileRef = useRef(null);
   const { t, i18n } = useTranslation();
   const otherLang = i18n.language === 'ar' ? 'en' : 'ar';
@@ -14,6 +17,14 @@ export default function TopBar({ onOpenGuide, onLoadSample, onFileUpload, onPrin
         <span className="mark">{t('brand.mark')}</span>
         <span className="tagline">{t('brand.tagline')}</span>
       </div>
+      <button
+        className="btn icon-btn mobile-only"
+        onClick={onOpenSettings}
+        aria-label={t('rail.formatting')}
+        title={t('rail.formatting')}
+      >
+        ⚙
+      </button>
       <button className="btn lang-btn mobile-only" onClick={() => setLanguage(otherLang)}>
         {otherLangLabel}
       </button>
@@ -38,6 +49,8 @@ export default function TopBar({ onOpenGuide, onLoadSample, onFileUpload, onPrin
             e.target.value = '';
           }}
         />
+        <button className="btn" onClick={onDownloadMd}>{t('topbar.downloadMd')}</button>
+        <button className="btn danger" onClick={onClear}>{t('topbar.clear')}</button>
         <button className="btn primary" onClick={onPrint}>{t('topbar.print')}</button>
       </div>
     </div>

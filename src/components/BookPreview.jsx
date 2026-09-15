@@ -1,14 +1,17 @@
 import React, { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { buildDocument } from '../lib/parser';
 import { THEMES, PAGE_SIZES } from '../lib/themes';
 import Paragraph from './Paragraph';
 
 export default function BookPreview({ rawText, theme, dir, numerals, termMode, pageSize }) {
+  const { t: tr } = useTranslation();
   const doc = useMemo(
     () => buildDocument(rawText, { numerals }),
     [rawText, numerals]
   );
   const t = THEMES[theme];
+  const isEmpty = !doc.meta.title && doc.content.length === 0;
 
   const pageStyle = {
     background: t.pageBg,
@@ -30,6 +33,9 @@ export default function BookPreview({ rawText, theme, dir, numerals, termMode, p
 
   return (
     <div id="book-page" style={pageStyle}>
+      {isEmpty && (
+        <div className="bk-empty">{tr('editor.empty')}</div>
+      )}
       {doc.meta.title && (
         <div className="bk-title">
           <div className="bk-title-main">{doc.meta.title}</div>

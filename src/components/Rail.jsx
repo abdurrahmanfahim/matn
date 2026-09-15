@@ -19,17 +19,48 @@ function TogglePair({ options, value, onChange }) {
   );
 }
 
+function ThemeChip({ active, onSelect, swatch, name }) {
+  const handleKey = (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onSelect();
+    }
+  };
+  return (
+    <div
+      className={`theme-chip ${active ? 'active' : ''}`}
+      onClick={onSelect}
+      onKeyDown={handleKey}
+      role="button"
+      tabIndex={0}
+      aria-pressed={active}
+    >
+      <div className="swatch">
+        {swatch.map((c, i) => (
+          <span key={i} style={{ background: c }} />
+        ))}
+      </div>
+      <div className="name">{name}</div>
+    </div>
+  );
+}
+
 export default function Rail({
   theme, setTheme,
   dir, setDir,
   numerals, setNumerals,
   termMode, setTermMode,
   pageSize, setPageSize,
+  mobileOpen, onClose,
 }) {
   const { t, i18n } = useTranslation();
 
   return (
-    <div className="rail">
+    <div className={`rail ${mobileOpen ? 'mobile-open' : ''}`}>
+      <button className="rail-close-btn" onClick={onClose} aria-label={t('close')}>
+        {t('close')} ✕
+      </button>
+
       <div className="rail-section">
         <h3>{t('rail.language')}</h3>
         <TogglePair
@@ -43,18 +74,13 @@ export default function Rail({
         <h3>{t('rail.formatting')}</h3>
         <div className="theme-grid">
           {Object.entries(THEMES).map(([key, th]) => (
-            <div
+            <ThemeChip
               key={key}
-              className={`theme-chip ${theme === key ? 'active' : ''}`}
-              onClick={() => setTheme(key)}
-            >
-              <div className="swatch">
-                {th.swatch.map((c, i) => (
-                  <span key={i} style={{ background: c }} />
-                ))}
-              </div>
-              <div className="name">{t(`themes.${key}`)}</div>
-            </div>
+              active={theme === key}
+              onSelect={() => setTheme(key)}
+              swatch={th.swatch}
+              name={t(`themes.${key}`)}
+            />
           ))}
         </div>
       </div>
