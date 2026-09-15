@@ -1,6 +1,7 @@
 {
   "brand": { "mark": "Warraq", "tagline": "From Text to Book" },
   "topbar": {
+    "library": "My Books",
     "guide": "Text Format",
     "promptBuilder": "Create via AI",
     "jsonImport": "Import JSON",
@@ -66,5 +67,14 @@
     "copy": "Copy Prompt",
     "copied": "Copied ✓"
   },
-  "close": "Close"
+  "close": "Close",
+  "library": {
+    "title": "My Books",
+    "newBook": "+ New Book",
+    "empty": "No books saved yet.",
+    "untitled": "Untitled Book",
+    "current": "current",
+    "delete": "Delete",
+    "deleteConfirm": "Delete this book permanently? This cannot be undone."
+  }
 }

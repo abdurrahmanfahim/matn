@@ -4,7 +4,7 @@ import { setLanguage } from '../i18n';
 
 export default function TopBar({
   onOpenGuide, onLoadSample, onFileUpload, onPrint,
-  onOpenJsonImport, onOpenPromptBuilder, onDownloadMd, onClear, onOpenSettings,
+  onOpenJsonImport, onOpenPromptBuilder, onDownloadMd, onClear, onOpenSettings, onOpenLibrary,
 }) {
   const fileRef = useRef(null);
   const { t, i18n } = useTranslation();
@@ -30,6 +30,7 @@ export default function TopBar({
       </button>
       <div className="topbar-spacer" />
       <div className="top-actions">
+        <button className="btn" onClick={onOpenLibrary}>{t('topbar.library')}</button>
         <button className="btn" onClick={onOpenGuide}>{t('topbar.guide')}</button>
         <button className="btn" onClick={onOpenPromptBuilder}>{t('topbar.promptBuilder')}</button>
         <button className="btn" onClick={onOpenJsonImport}>{t('topbar.jsonImport')}</button>

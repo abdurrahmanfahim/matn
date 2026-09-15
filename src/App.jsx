@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import TopBar from './components/TopBar';
 import Rail from './components/Rail';
@@ -6,7 +6,12 @@ import BookPreview from './components/BookPreview';
 import GuideModal from './components/GuideModal';
 import JsonImportModal from './components/JsonImportModal';
 import PromptBuilderModal from './components/PromptBuilderModal';
+import LibraryModal from './components/LibraryModal';
 import { SAMPLE_AR, SAMPLE_EN } from './lib/sample';
+import {
+  getAllBooks, getBook, getActiveBookId, setActiveBookId,
+  createBook, updateBookText, updateBookSettings, deleteBook, migrateLegacyDraft,
+} from './lib/library';
 import './App.css';
 
 function detectLang() {
@@ -17,7 +22,7 @@ function detectLang() {
   return 'en';
 }
 
-function defaultStateFor(lang) {
+function defaultSettingsFor(lang) {
   return {
     theme: 'emerald',
     dir: lang === 'ar' ? 'rtl' : 'ltr',
@@ -27,46 +32,72 @@ function defaultStateFor(lang) {
   };
 }
 
-function loadInitial() {
+function fallbackTitleFor(lang) {
+  return lang === 'ar' ? 'كتاب بلا عنوان' : 'Untitled Book';
+}
+
+// Resolve which book should be open when the app first loads: the last
+// active one, a migrated legacy draft, the most recently edited book, or
+// (only if the library is completely empty) a fresh sample book.
+function loadInitialBook() {
   const lang = detectLang();
-  const DEFAULT_STATE = defaultStateFor(lang);
-  try {
-    const savedState = localStorage.getItem('warraq_state');
-    const savedDraft = localStorage.getItem('warraq_draft');
-    return {
-      settings: savedState ? { ...DEFAULT_STATE, ...JSON.parse(savedState) } : DEFAULT_STATE,
-      text: savedDraft || (lang === 'ar' ? SAMPLE_AR : SAMPLE_EN),
-    };
-  } catch (e) {
-    return { settings: DEFAULT_STATE, text: lang === 'ar' ? SAMPLE_AR : SAMPLE_EN };
+  const fallbackTitle = fallbackTitleFor(lang);
+
+  let book = null;
+  const activeId = getActiveBookId();
+  if (activeId) book = getBook(activeId);
+
+  if (!book) book = migrateLegacyDraft(fallbackTitle);
+
+  if (!book) {
+    const existing = getAllBooks();
+    if (existing.length) {
+      book = existing[0];
+      setActiveBookId(book.id);
+    }
   }
+
+  if (!book) {
+    book = createBook(lang === 'ar' ? SAMPLE_AR : SAMPLE_EN, fallbackTitle, defaultSettingsFor(lang));
+  }
+
+  return book;
 }
 
 export default function App() {
   const { t, i18n } = useTranslation();
-  const initial = loadInitial();
-  const [text, setText] = useState(initial.text);
-  const [theme, setTheme] = useState(initial.settings.theme);
-  const [dir, setDir] = useState(initial.settings.dir);
-  const [numerals, setNumerals] = useState(initial.settings.numerals);
-  const [termMode, setTermMode] = useState(initial.settings.termMode);
-  const [pageSize, setPageSize] = useState(initial.settings.pageSize);
+  const initialBook = useRef(loadInitialBook()).current;
+  const initialSettings = { ...defaultSettingsFor(i18n.language), ...(initialBook.settings || {}) };
+
+  const [activeBookId, setActiveBookIdState] = useState(initialBook.id);
+  const [text, setText] = useState(initialBook.text);
+  const [theme, setTheme] = useState(initialSettings.theme);
+  const [dir, setDir] = useState(initialSettings.dir);
+  const [numerals, setNumerals] = useState(initialSettings.numerals);
+  const [termMode, setTermMode] = useState(initialSettings.termMode);
+  const [pageSize, setPageSize] = useState(initialSettings.pageSize);
+
   const [guideOpen, setGuideOpen] = useState(false);
   const [jsonImportOpen, setJsonImportOpen] = useState(false);
   const [promptBuilderOpen, setPromptBuilderOpen] = useState(false);
+  const [libraryOpen, setLibraryOpen] = useState(false);
   const [railOpen, setRailOpen] = useState(false);
+  const [books, setBooks] = useState(() => getAllBooks());
 
+  const refreshBooks = useCallback(() => setBooks(getAllBooks()), []);
+
+  // Autosave text to the active book.
   useEffect(() => {
-    try {
-      localStorage.setItem('warraq_draft', text);
-      localStorage.setItem(
-        'warraq_state',
-        JSON.stringify({ theme, dir, numerals, termMode, pageSize })
-      );
-    } catch (e) {
-      /* storage unavailable — ignore */
-    }
-  }, [text, theme, dir, numerals, termMode, pageSize]);
+    updateBookText(activeBookId, text, fallbackTitleFor(i18n.language));
+    refreshBooks();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [text, activeBookId]);
+
+  // Autosave per-book settings.
+  useEffect(() => {
+    updateBookSettings(activeBookId, { theme, dir, numerals, termMode, pageSize });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [theme, dir, numerals, termMode, pageSize, activeBookId]);
 
   useEffect(() => {
     if ('serviceWorker' in navigator) {
@@ -80,6 +111,7 @@ export default function App() {
       setGuideOpen(false);
       setJsonImportOpen(false);
       setPromptBuilderOpen(false);
+      setLibraryOpen(false);
       setRailOpen(false);
     };
     window.addEventListener('keydown', handleKey);
@@ -95,6 +127,18 @@ export default function App() {
     }
     styleTag.textContent = `@media print { @page { size: ${pageSize}; margin: 1.8cm; } }`;
   }, [pageSize]);
+
+  const switchToBook = useCallback((book) => {
+    const settings = { ...defaultSettingsFor(i18n.language), ...(book.settings || {}) };
+    setActiveBookIdState(book.id);
+    setActiveBookId(book.id);
+    setText(book.text);
+    setTheme(settings.theme);
+    setDir(settings.dir);
+    setNumerals(settings.numerals);
+    setTermMode(settings.termMode);
+    setPageSize(settings.pageSize);
+  }, [i18n.language]);
 
   const handlePrint = useCallback(() => window.print(), []);
   const handleLoadSample = useCallback(() => {
@@ -124,6 +168,38 @@ export default function App() {
     }
   }, [t]);
 
+  const handleNewBook = useCallback(() => {
+    const book = createBook('', fallbackTitleFor(i18n.language), defaultSettingsFor(i18n.language));
+    refreshBooks();
+    switchToBook(book);
+    setLibraryOpen(false);
+  }, [i18n.language, switchToBook, refreshBooks]);
+
+  const handleOpenBook = useCallback((id) => {
+    const book = getBook(id);
+    if (book) switchToBook(book);
+    setLibraryOpen(false);
+  }, [switchToBook]);
+
+  const handleDeleteBook = useCallback((id) => {
+    deleteBook(id);
+    const remaining = getAllBooks();
+    setBooks(remaining);
+    if (id === activeBookId) {
+      if (remaining.length) {
+        switchToBook(remaining[0]);
+      } else {
+        const book = createBook(
+          i18n.language === 'ar' ? SAMPLE_AR : SAMPLE_EN,
+          fallbackTitleFor(i18n.language),
+          defaultSettingsFor(i18n.language)
+        );
+        refreshBooks();
+        switchToBook(book);
+      }
+    }
+  }, [activeBookId, switchToBook, i18n.language, refreshBooks]);
+
   return (
     <div className="app-shell">
       <TopBar
@@ -136,6 +212,7 @@ export default function App() {
         onDownloadMd={handleDownloadMd}
         onClear={handleClear}
         onOpenSettings={() => setRailOpen(true)}
+        onOpenLibrary={() => { refreshBooks(); setLibraryOpen(true); }}
       />
       <div className="workspace">
         {railOpen && <div className="rail-backdrop" onClick={() => setRailOpen(false)} />}
@@ -179,6 +256,15 @@ export default function App() {
         onApply={handleJsonApply}
       />
       <PromptBuilderModal open={promptBuilderOpen} onClose={() => setPromptBuilderOpen(false)} />
+      <LibraryModal
+        open={libraryOpen}
+        onClose={() => setLibraryOpen(false)}
+        books={books}
+        activeBookId={activeBookId}
+        onOpenBook={handleOpenBook}
+        onDeleteBook={handleDeleteBook}
+        onNewBook={handleNewBook}
+      />
     </div>
   );
 }

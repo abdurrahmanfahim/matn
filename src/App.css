@@ -306,6 +306,42 @@ select {
 }
 .modal-header { display: flex; justify-content: space-between; align-items: flex-start; }
 
+.btn.small { padding: 5px 10px; font-size: 11.5px; }
+
+.library-list { display: flex; flex-direction: column; gap: 8px; }
+.library-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--ink-3);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: border-color .15s;
+}
+.library-row:hover { border-color: var(--brass); }
+.library-row.active { border-color: var(--brass-bright); background: rgba(212, 172, 116, .06); }
+.library-row-info { min-width: 0; }
+.library-row-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--parchment);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.library-badge {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--brass-bright);
+  border-radius: 3px;
+  padding: 1px 6px;
+  margin-inline-start: 8px;
+}
+.library-row-date { font-size: 11px; color: var(--parchment-dim); margin-top: 2px; }
+
 /* ---- responsive ---- */
 @media (max-width: 880px) {
   .rail { display: none; }

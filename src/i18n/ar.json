@@ -1,6 +1,7 @@
 {
   "brand": { "mark": "وَرّاق", "tagline": "من نص إلى كتاب" },
   "topbar": {
+    "library": "كتبي",
     "guide": "صيغة النص",
     "promptBuilder": "إنشاء عبر AI",
     "jsonImport": "استيراد JSON",
@@ -66,5 +67,14 @@
     "copy": "نسخ الطلب",
     "copied": "تم النسخ ✓"
   },
-  "close": "إغلاق"
+  "close": "إغلاق",
+  "library": {
+    "title": "كتبي",
+    "newBook": "+ كتاب جديد",
+    "empty": "لا توجد كتب محفوظة بعد.",
+    "untitled": "كتاب بلا عنوان",
+    "current": "الحالي",
+    "delete": "حذف",
+    "deleteConfirm": "حذف هذا الكتاب نهائياً؟ لا يمكن التراجع عن هذا."
+  }
 }
