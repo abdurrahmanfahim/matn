@@ -7,8 +7,10 @@ import GuideModal from './components/GuideModal';
 import JsonImportModal from './components/JsonImportModal';
 import PromptBuilderModal from './components/PromptBuilderModal';
 import LibraryModal from './components/LibraryModal';
+import FindReplace from './components/FindReplace';
 import { SAMPLE_AR, SAMPLE_EN } from './lib/sample';
 import { extractDocx, extractPdf, isDocx, isPdf } from './lib/fileExtract';
+import { buildStandaloneHtml } from './lib/exportHtml';
 import {
   getAllBooks, getBook, getActiveBookId, setActiveBookId,
   createBook, updateBookText, updateBookSettings, deleteBook, migrateLegacyDraft,
@@ -87,6 +89,10 @@ export default function App() {
   const [railOpen, setRailOpen] = useState(false);
   const [books, setBooks] = useState(() => getAllBooks());
   const [extracting, setExtracting] = useState(false);
+  const [findReplaceOpen, setFindReplaceOpen] = useState(false);
+  const editorRef = useRef(null);
+  const handleDownloadMdRef = useRef();
+  const wrapSelectionRef = useRef();
 
   const wordCount = useMemo(() => {
     const trimmed = text.trim();
@@ -117,12 +123,30 @@ export default function App() {
 
   useEffect(() => {
     const handleKey = (e) => {
-      if (e.key !== 'Escape') return;
-      setGuideOpen(false);
-      setJsonImportOpen(false);
-      setPromptBuilderOpen(false);
-      setLibraryOpen(false);
-      setRailOpen(false);
+      if (e.key === 'Escape') {
+        setGuideOpen(false);
+        setJsonImportOpen(false);
+        setPromptBuilderOpen(false);
+        setLibraryOpen(false);
+        setRailOpen(false);
+        setFindReplaceOpen(false);
+        return;
+      }
+      const mod = e.ctrlKey || e.metaKey;
+      if (!mod) return;
+      if (e.key === 'f' || e.key === 'F') {
+        e.preventDefault();
+        setFindReplaceOpen(true);
+      } else if (e.key === 's' || e.key === 'S') {
+        e.preventDefault();
+        handleDownloadMdRef.current?.();
+      } else if ((e.key === 'b' || e.key === 'B') && document.activeElement === editorRef.current) {
+        e.preventDefault();
+        wrapSelectionRef.current?.('**');
+      } else if ((e.key === 'i' || e.key === 'I') && document.activeElement === editorRef.current) {
+        e.preventDefault();
+        wrapSelectionRef.current?.('*');
+      }
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
@@ -172,6 +196,36 @@ export default function App() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   }, [text]);
+  useEffect(() => { handleDownloadMdRef.current = handleDownloadMd; }, [handleDownloadMd]);
+
+  const handleDownloadHtml = useCallback(() => {
+    const html = buildStandaloneHtml(text, { theme, dir, numerals, termMode, pageSize });
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'book.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, [text, theme, dir, numerals, termMode, pageSize]);
+
+  const wrapSelection = useCallback((marker) => {
+    const el = editorRef.current;
+    if (!el) return;
+    const start = el.selectionStart;
+    const end = el.selectionEnd;
+    setText((prev) => {
+      const next = prev.slice(0, start) + marker + prev.slice(start, end) + marker + prev.slice(end);
+      requestAnimationFrame(() => {
+        el.focus();
+        el.setSelectionRange(start + marker.length, end + marker.length);
+      });
+      return next;
+    });
+  }, []);
+  useEffect(() => { wrapSelectionRef.current = wrapSelection; }, [wrapSelection]);
   const handleClear = useCallback(() => {
     if (window.confirm(t('topbar.clearConfirm'))) {
       setText('');
@@ -252,9 +306,11 @@ export default function App() {
         onOpenJsonImport={() => setJsonImportOpen(true)}
         onOpenPromptBuilder={() => setPromptBuilderOpen(true)}
         onDownloadMd={handleDownloadMd}
+        onDownloadHtml={handleDownloadHtml}
         onClear={handleClear}
         onOpenSettings={() => setRailOpen(true)}
         onOpenLibrary={() => { refreshBooks(); setLibraryOpen(true); }}
+        onOpenFind={() => setFindReplaceOpen(true)}
         extracting={extracting}
       />
       <div className="workspace">
@@ -280,11 +336,19 @@ export default function App() {
             </div>
             <textarea
               id="editor"
+              ref={editorRef}
               spellCheck={false}
               value={text}
               onChange={(e) => setText(e.target.value)}
               dir={dir}
               style={{ textAlign: dir === 'rtl' ? 'right' : 'left' }}
+            />
+            <FindReplace
+              open={findReplaceOpen}
+              onClose={() => setFindReplaceOpen(false)}
+              text={text}
+              setText={setText}
+              editorRef={editorRef}
             />
           </div>
           <div className="preview-pane">

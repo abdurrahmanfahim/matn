@@ -10,6 +10,8 @@
     "extracting": "جارٍ الاستخراج…",
     "extractError": "تعذّرت قراءة هذا الملف. جرّب ملف .docx أو .pdf أو .md أو .txt.",
     "downloadMd": "تنزيل .md",
+    "downloadHtml": "تنزيل HTML",
+    "find": "بحث",
     "clear": "مسح",
     "clearConfirm": "مسح كل محتوى المحرّر والبدء من جديد؟ لا يمكن التراجع عن هذا.",
     "print": "تصدير PDF"
@@ -71,6 +73,12 @@
     "copied": "تم النسخ ✓"
   },
   "close": "إغلاق",
+  "findReplace": {
+    "find": "بحث",
+    "replace": "استبدال بـ",
+    "replaceOne": "استبدال",
+    "replaceAll": "استبدال الكل"
+  },
   "library": {
     "title": "كتبي",
     "newBook": "+ كتاب جديد",

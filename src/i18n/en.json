@@ -10,6 +10,8 @@
     "extracting": "Extracting…",
     "extractError": "Couldn't read that file. Please try a .docx, .pdf, .md, or .txt file.",
     "downloadMd": "Download .md",
+    "downloadHtml": "Download HTML",
+    "find": "Find",
     "clear": "Clear",
     "clearConfirm": "Clear the whole editor and start over? This cannot be undone.",
     "print": "Export PDF"
@@ -71,6 +73,12 @@
     "copied": "Copied ✓"
   },
   "close": "Close",
+  "findReplace": {
+    "find": "Find",
+    "replace": "Replace with",
+    "replaceOne": "Replace",
+    "replaceAll": "Replace All"
+  },
   "library": {
     "title": "My Books",
     "newBook": "+ New Book",

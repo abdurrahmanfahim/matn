@@ -4,8 +4,8 @@ import { setLanguage } from '../i18n';
 
 export default function TopBar({
   onOpenGuide, onLoadSample, onFileUpload, onPrint,
-  onOpenJsonImport, onOpenPromptBuilder, onDownloadMd, onClear, onOpenSettings, onOpenLibrary,
-  extracting,
+  onOpenJsonImport, onOpenPromptBuilder, onDownloadMd, onDownloadHtml, onClear, onOpenSettings, onOpenLibrary,
+  onOpenFind, extracting,
 }) {
   const fileRef = useRef(null);
   const { t, i18n } = useTranslation();
@@ -51,7 +51,9 @@ export default function TopBar({
             e.target.value = '';
           }}
         />
+        <button className="btn" onClick={onOpenFind}>{t('topbar.find')}</button>
         <button className="btn" onClick={onDownloadMd}>{t('topbar.downloadMd')}</button>
+        <button className="btn" onClick={onDownloadHtml}>{t('topbar.downloadHtml')}</button>
         <button className="btn danger" onClick={onClear}>{t('topbar.clear')}</button>
         <button className="btn primary" onClick={onPrint}>{t('topbar.print')}</button>
       </div>
