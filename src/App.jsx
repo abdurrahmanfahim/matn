@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import TopBar from './components/TopBar';
 import Rail from './components/Rail';
@@ -8,11 +8,14 @@ import JsonImportModal from './components/JsonImportModal';
 import PromptBuilderModal from './components/PromptBuilderModal';
 import LibraryModal from './components/LibraryModal';
 import { SAMPLE_AR, SAMPLE_EN } from './lib/sample';
+import { extractDocx, extractPdf, isDocx, isPdf } from './lib/fileExtract';
 import {
   getAllBooks, getBook, getActiveBookId, setActiveBookId,
   createBook, updateBookText, updateBookSettings, deleteBook, migrateLegacyDraft,
 } from './lib/library';
 import './App.css';
+
+const WORDS_PER_PAGE = 220;
 
 function detectLang() {
   try {
@@ -83,6 +86,13 @@ export default function App() {
   const [libraryOpen, setLibraryOpen] = useState(false);
   const [railOpen, setRailOpen] = useState(false);
   const [books, setBooks] = useState(() => getAllBooks());
+  const [extracting, setExtracting] = useState(false);
+
+  const wordCount = useMemo(() => {
+    const trimmed = text.trim();
+    return trimmed ? trimmed.split(/\s+/).length : 0;
+  }, [text]);
+  const estPages = wordCount ? Math.max(1, Math.ceil(wordCount / WORDS_PER_PAGE)) : 0;
 
   const refreshBooks = useCallback(() => setBooks(getAllBooks()), []);
 
@@ -168,6 +178,38 @@ export default function App() {
     }
   }, [t]);
 
+  const handleFileSelected = useCallback(async (file) => {
+    if (isDocx(file)) {
+      setExtracting(true);
+      try {
+        const buf = await file.arrayBuffer();
+        const md = await extractDocx(buf);
+        setText(md);
+      } catch (e) {
+        window.alert(t('topbar.extractError'));
+      } finally {
+        setExtracting(false);
+      }
+      return;
+    }
+    if (isPdf(file)) {
+      setExtracting(true);
+      try {
+        const buf = await file.arrayBuffer();
+        const md = await extractPdf(buf);
+        setText(md);
+      } catch (e) {
+        window.alert(t('topbar.extractError'));
+      } finally {
+        setExtracting(false);
+      }
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (ev) => setText(ev.target.result);
+    reader.readAsText(file, 'UTF-8');
+  }, [t]);
+
   const handleNewBook = useCallback(() => {
     const book = createBook('', fallbackTitleFor(i18n.language), defaultSettingsFor(i18n.language));
     refreshBooks();
@@ -205,7 +247,7 @@ export default function App() {
       <TopBar
         onOpenGuide={() => setGuideOpen(true)}
         onLoadSample={handleLoadSample}
-        onFileUpload={setText}
+        onFileUpload={handleFileSelected}
         onPrint={handlePrint}
         onOpenJsonImport={() => setJsonImportOpen(true)}
         onOpenPromptBuilder={() => setPromptBuilderOpen(true)}
@@ -213,6 +255,7 @@ export default function App() {
         onClear={handleClear}
         onOpenSettings={() => setRailOpen(true)}
         onOpenLibrary={() => { refreshBooks(); setLibraryOpen(true); }}
+        extracting={extracting}
       />
       <div className="workspace">
         {railOpen && <div className="rail-backdrop" onClick={() => setRailOpen(false)} />}
@@ -227,7 +270,14 @@ export default function App() {
         />
         <div className="panes">
           <div className="editor-pane">
-            <div className="pane-label">{t('editor.label')}</div>
+            <div className="pane-label">
+              <span>{t('editor.label')}</span>
+              {wordCount > 0 && (
+                <span className="pane-stats">
+                  {t('editor.stats', { words: wordCount, pages: estPages })}
+                </span>
+              )}
+            </div>
             <textarea
               id="editor"
               spellCheck={false}

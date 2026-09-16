@@ -7,6 +7,8 @@
     "jsonImport": "Import JSON",
     "sample": "Sample Text",
     "upload": "Upload File",
+    "extracting": "Extracting…",
+    "extractError": "Couldn't read that file. Please try a .docx, .pdf, .md, or .txt file.",
     "downloadMd": "Download .md",
     "clear": "Clear",
     "clearConfirm": "Clear the whole editor and start over? This cannot be undone.",
@@ -33,7 +35,8 @@
   },
   "editor": {
     "label": "Source Text (Markdown)",
-    "empty": "Start typing in the editor to see your book take shape here."
+    "empty": "Start typing in the editor to see your book take shape here.",
+    "stats": "{{words}} words · ~{{pages}} pages"
   },
   "guide": {
     "title": "Text Format",

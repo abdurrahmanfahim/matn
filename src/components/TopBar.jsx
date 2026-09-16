@@ -5,6 +5,7 @@ import { setLanguage } from '../i18n';
 export default function TopBar({
   onOpenGuide, onLoadSample, onFileUpload, onPrint,
   onOpenJsonImport, onOpenPromptBuilder, onDownloadMd, onClear, onOpenSettings, onOpenLibrary,
+  extracting,
 }) {
   const fileRef = useRef(null);
   const { t, i18n } = useTranslation();
@@ -35,18 +36,18 @@ export default function TopBar({
         <button className="btn" onClick={onOpenPromptBuilder}>{t('topbar.promptBuilder')}</button>
         <button className="btn" onClick={onOpenJsonImport}>{t('topbar.jsonImport')}</button>
         <button className="btn" onClick={onLoadSample}>{t('topbar.sample')}</button>
-        <label className="btn" onClick={() => fileRef.current?.click()}>{t('topbar.upload')}</label>
+        <label className="btn" onClick={() => fileRef.current?.click()}>
+          {extracting ? t('topbar.extracting') : t('topbar.upload')}
+        </label>
         <input
           ref={fileRef}
           type="file"
-          accept=".md,.txt,text/markdown,text/plain"
+          accept=".md,.txt,.docx,.pdf,text/markdown,text/plain,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
           style={{ display: 'none' }}
           onChange={(e) => {
             const file = e.target.files[0];
             if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (ev) => onFileUpload(ev.target.result);
-            reader.readAsText(file, 'UTF-8');
+            onFileUpload(file);
             e.target.value = '';
           }}
         />
