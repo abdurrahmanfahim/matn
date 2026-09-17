@@ -1,15 +1,10 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { buildDocument } from '../lib/parser';
 import { THEMES, PAGE_SIZES } from '../lib/themes';
 import Paragraph from './Paragraph';
 
-export default function BookPreview({ rawText, theme, dir, numerals, termMode, pageSize }) {
+export default function BookPreview({ doc, theme, dir, termMode, pageSize }) {
   const { t: tr } = useTranslation();
-  const doc = useMemo(
-    () => buildDocument(rawText, { numerals }),
-    [rawText, numerals]
-  );
   const t = THEMES[theme];
   const isEmpty = !doc.meta.title && doc.content.length === 0;
 

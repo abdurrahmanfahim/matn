@@ -12,6 +12,7 @@
     "downloadMd": "Download .md",
     "downloadHtml": "Download HTML",
     "find": "Find",
+    "outline": "Outline",
     "clear": "Clear",
     "clearConfirm": "Clear the whole editor and start over? This cannot be undone.",
     "print": "Export PDF"
@@ -38,7 +39,22 @@
   "editor": {
     "label": "Source Text (Markdown)",
     "empty": "Start typing in the editor to see your book take shape here.",
-    "stats": "{{words}} words · ~{{pages}} pages"
+    "stats": "{{words}} words · ~{{pages}} pages",
+    "tabEdit": "Edit",
+    "tabPreview": "Preview"
+  },
+  "toolbar": {
+    "bold": "Bold",
+    "italic": "Italic",
+    "chapter": "Chapter",
+    "sub": "Sub-heading",
+    "verse": "Verse",
+    "chapterPlaceholder": "Chapter title",
+    "subPlaceholder": "Sub-heading title"
+  },
+  "outline": {
+    "title": "Outline",
+    "empty": "No chapters yet — add a \"#\" heading to see it here."
   },
   "guide": {
     "title": "Text Format",

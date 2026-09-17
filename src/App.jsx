@@ -8,7 +8,10 @@ import JsonImportModal from './components/JsonImportModal';
 import PromptBuilderModal from './components/PromptBuilderModal';
 import LibraryModal from './components/LibraryModal';
 import FindReplace from './components/FindReplace';
+import EditorToolbar from './components/EditorToolbar';
+import OutlineModal from './components/OutlineModal';
 import { SAMPLE_AR, SAMPLE_EN } from './lib/sample';
+import { buildDocument } from './lib/parser';
 import { extractDocx, extractPdf, isDocx, isPdf } from './lib/fileExtract';
 import { buildStandaloneHtml } from './lib/exportHtml';
 import {
@@ -90,9 +93,15 @@ export default function App() {
   const [books, setBooks] = useState(() => getAllBooks());
   const [extracting, setExtracting] = useState(false);
   const [findReplaceOpen, setFindReplaceOpen] = useState(false);
+  const [outlineOpen, setOutlineOpen] = useState(false);
+  const [mobileView, setMobileView] = useState('edit');
   const editorRef = useRef(null);
+  const previewRef = useRef(null);
+  const syncingRef = useRef(false);
   const handleDownloadMdRef = useRef();
   const wrapSelectionRef = useRef();
+
+  const doc = useMemo(() => buildDocument(text, { numerals }), [text, numerals]);
 
   const wordCount = useMemo(() => {
     const trimmed = text.trim();
@@ -130,6 +139,7 @@ export default function App() {
         setLibraryOpen(false);
         setRailOpen(false);
         setFindReplaceOpen(false);
+        setOutlineOpen(false);
         return;
       }
       const mod = e.ctrlKey || e.metaKey;
@@ -226,6 +236,84 @@ export default function App() {
     });
   }, []);
   useEffect(() => { wrapSelectionRef.current = wrapSelection; }, [wrapSelection]);
+
+  const insertLinePrefix = useCallback((prefix, placeholder) => {
+    const el = editorRef.current;
+    if (!el) return;
+    const start = el.selectionStart;
+    const end = el.selectionEnd;
+    setText((prev) => {
+      const lineStart = prev.lastIndexOf('\n', start - 1) + 1;
+      const hasSelection = end > start;
+      const insertion = prefix + (hasSelection ? '' : placeholder || '');
+      const next = prev.slice(0, lineStart) + insertion + prev.slice(lineStart);
+      requestAnimationFrame(() => {
+        el.focus();
+        if (hasSelection) {
+          el.setSelectionRange(lineStart + prefix.length, end + prefix.length);
+        } else if (placeholder) {
+          // select the placeholder so typing immediately replaces it
+          el.setSelectionRange(lineStart + prefix.length, lineStart + prefix.length + placeholder.length);
+        } else {
+          const cursorPos = lineStart + insertion.length;
+          el.setSelectionRange(cursorPos, cursorPos);
+        }
+      });
+      return next;
+    });
+  }, []);
+
+  const insertVerse = useCallback(() => {
+    const el = editorRef.current;
+    if (!el) return;
+    const start = el.selectionStart;
+    const end = el.selectionEnd;
+    setText((prev) => {
+      const selected = prev.slice(start, end);
+      const block = selected
+        ? selected.split('\n').map((l) => `> ${l}`).join('\n')
+        : '> ';
+      const next = prev.slice(0, start) + block + prev.slice(end);
+      const cursorPos = start + block.length;
+      requestAnimationFrame(() => {
+        el.focus();
+        el.setSelectionRange(cursorPos, cursorPos);
+      });
+      return next;
+    });
+  }, []);
+
+  const handleEditorScroll = useCallback(() => {
+    if (syncingRef.current) { syncingRef.current = false; return; }
+    const el = editorRef.current;
+    const target = previewRef.current;
+    if (!el || !target) return;
+    const denom = el.scrollHeight - el.clientHeight;
+    const ratio = denom > 0 ? el.scrollTop / denom : 0;
+    syncingRef.current = true;
+    const targetDenom = target.scrollHeight - target.clientHeight;
+    target.scrollTop = ratio * Math.max(0, targetDenom);
+  }, []);
+
+  const handlePreviewScroll = useCallback(() => {
+    if (syncingRef.current) { syncingRef.current = false; return; }
+    const el = editorRef.current;
+    const source = previewRef.current;
+    if (!el || !source) return;
+    const denom = source.scrollHeight - source.clientHeight;
+    const ratio = denom > 0 ? source.scrollTop / denom : 0;
+    syncingRef.current = true;
+    const targetDenom = el.scrollHeight - el.clientHeight;
+    el.scrollTop = ratio * Math.max(0, targetDenom);
+  }, []);
+
+  const handleJumpToSection = useCallback((id) => {
+    const target = previewRef.current?.querySelector(`#${id}`);
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setOutlineOpen(false);
+    setMobileView('preview');
+  }, []);
+
   const handleClear = useCallback(() => {
     if (window.confirm(t('topbar.clearConfirm'))) {
       setText('');
@@ -311,6 +399,7 @@ export default function App() {
         onOpenSettings={() => setRailOpen(true)}
         onOpenLibrary={() => { refreshBooks(); setLibraryOpen(true); }}
         onOpenFind={() => setFindReplaceOpen(true)}
+        onOpenOutline={() => setOutlineOpen(true)}
         extracting={extracting}
       />
       <div className="workspace">
@@ -325,7 +414,15 @@ export default function App() {
           onClose={() => setRailOpen(false)}
         />
         <div className="panes">
-          <div className="editor-pane">
+          <div className="mobile-view-tabs">
+            <button className={mobileView === 'edit' ? 'active' : ''} onClick={() => setMobileView('edit')}>
+              {t('editor.tabEdit')}
+            </button>
+            <button className={mobileView === 'preview' ? 'active' : ''} onClick={() => setMobileView('preview')}>
+              {t('editor.tabPreview')}
+            </button>
+          </div>
+          <div className={`editor-pane ${mobileView === 'preview' ? 'mobile-hidden' : ''}`}>
             <div className="pane-label">
               <span>{t('editor.label')}</span>
               {wordCount > 0 && (
@@ -334,12 +431,20 @@ export default function App() {
                 </span>
               )}
             </div>
+            <EditorToolbar
+              onBold={() => wrapSelection('**')}
+              onItalic={() => wrapSelection('*')}
+              onChapter={() => insertLinePrefix('# ', t('toolbar.chapterPlaceholder'))}
+              onSub={() => insertLinePrefix('## ', t('toolbar.subPlaceholder'))}
+              onVerse={insertVerse}
+            />
             <textarea
               id="editor"
               ref={editorRef}
               spellCheck={false}
               value={text}
               onChange={(e) => setText(e.target.value)}
+              onScroll={handleEditorScroll}
               dir={dir}
               style={{ textAlign: dir === 'rtl' ? 'right' : 'left' }}
             />
@@ -351,12 +456,15 @@ export default function App() {
               editorRef={editorRef}
             />
           </div>
-          <div className="preview-pane">
+          <div
+            className={`preview-pane ${mobileView === 'edit' ? 'mobile-hidden' : ''}`}
+            ref={previewRef}
+            onScroll={handlePreviewScroll}
+          >
             <BookPreview
-              rawText={text}
+              doc={doc}
               theme={theme}
               dir={dir}
-              numerals={numerals}
               termMode={termMode}
               pageSize={pageSize}
             />
@@ -378,6 +486,12 @@ export default function App() {
         onOpenBook={handleOpenBook}
         onDeleteBook={handleDeleteBook}
         onNewBook={handleNewBook}
+      />
+      <OutlineModal
+        open={outlineOpen}
+        onClose={() => setOutlineOpen(false)}
+        toc={doc.toc}
+        onJump={handleJumpToSection}
       />
     </div>
   );

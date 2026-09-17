@@ -5,7 +5,7 @@ import { setLanguage } from '../i18n';
 export default function TopBar({
   onOpenGuide, onLoadSample, onFileUpload, onPrint,
   onOpenJsonImport, onOpenPromptBuilder, onDownloadMd, onDownloadHtml, onClear, onOpenSettings, onOpenLibrary,
-  onOpenFind, extracting,
+  onOpenFind, onOpenOutline, extracting,
 }) {
   const fileRef = useRef(null);
   const { t, i18n } = useTranslation();
@@ -32,6 +32,8 @@ export default function TopBar({
       <div className="topbar-spacer" />
       <div className="top-actions">
         <button className="btn" onClick={onOpenLibrary}>{t('topbar.library')}</button>
+        <button className="btn" onClick={onOpenOutline}>{t('topbar.outline')}</button>
+        <span className="tb-divider" />
         <button className="btn" onClick={onOpenGuide}>{t('topbar.guide')}</button>
         <button className="btn" onClick={onOpenPromptBuilder}>{t('topbar.promptBuilder')}</button>
         <button className="btn" onClick={onOpenJsonImport}>{t('topbar.jsonImport')}</button>
@@ -52,6 +54,7 @@ export default function TopBar({
           }}
         />
         <button className="btn" onClick={onOpenFind}>{t('topbar.find')}</button>
+        <span className="tb-divider" />
         <button className="btn" onClick={onDownloadMd}>{t('topbar.downloadMd')}</button>
         <button className="btn" onClick={onDownloadHtml}>{t('topbar.downloadHtml')}</button>
         <button className="btn danger" onClick={onClear}>{t('topbar.clear')}</button>

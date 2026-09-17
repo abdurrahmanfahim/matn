@@ -12,6 +12,7 @@
     "downloadMd": "تنزيل .md",
     "downloadHtml": "تنزيل HTML",
     "find": "بحث",
+    "outline": "المخطط",
     "clear": "مسح",
     "clearConfirm": "مسح كل محتوى المحرّر والبدء من جديد؟ لا يمكن التراجع عن هذا.",
     "print": "تصدير PDF"
@@ -38,7 +39,22 @@
   "editor": {
     "label": "النص المصدر (Markdown)",
     "empty": "ابدأ الكتابة في المحرّر لترى كتابك يتشكّل هنا.",
-    "stats": "{{words}} كلمة · ~{{pages}} صفحة"
+    "stats": "{{words}} كلمة · ~{{pages}} صفحة",
+    "tabEdit": "تحرير",
+    "tabPreview": "معاينة"
+  },
+  "toolbar": {
+    "bold": "غامق",
+    "italic": "مائل",
+    "chapter": "فصل",
+    "sub": "عنوان فرعي",
+    "verse": "بيت شعر",
+    "chapterPlaceholder": "عنوان الفصل",
+    "subPlaceholder": "عنوان العنصر"
+  },
+  "outline": {
+    "title": "المخطط",
+    "empty": "لا توجد فصول بعد — أضف عنواناً بـ \"#\" لتراه هنا."
   },
   "guide": {
     "title": "صيغة النص",
