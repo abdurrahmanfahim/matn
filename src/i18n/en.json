@@ -11,6 +11,9 @@
     "extractError": "Couldn't read that file. Please try a .docx, .pdf, .md, or .txt file.",
     "downloadMd": "Download .md",
     "downloadHtml": "Download HTML",
+    "downloadEpub": "Download EPUB",
+    "export": "Export",
+    "epubError": "Couldn't build the EPUB file. Please try again.",
     "find": "Find",
     "outline": "Outline",
     "clear": "Clear",
@@ -34,7 +37,19 @@
     "emerald": "Emerald — Naskh",
     "scheherazade": "Scheherazade — Classic",
     "sans": "Modern — Plain",
-    "sepia": "Sepia — Amiri"
+    "sepia": "Sepia — Amiri",
+    "custom": "Custom"
+  },
+  "customColors": {
+    "pageBg": "Page background",
+    "text": "Body text",
+    "chapterBg": "Chapter box",
+    "chapterText": "Chapter text",
+    "subText": "Sub-heading text",
+    "subBorder": "Sub-heading border",
+    "verseBg": "Verse box",
+    "verseBorder": "Verse border",
+    "termColor": "Term highlight"
   },
   "editor": {
     "label": "Source Text (Markdown)",

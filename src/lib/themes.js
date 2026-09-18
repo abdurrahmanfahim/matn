@@ -65,6 +65,52 @@ export const THEMES = {
     dotColor: '#b7a37c',
     swatch: ['#5c3a21', '#8a3324', '#a9895a'],
   },
+  custom: {
+    name: 'مخصّص — Custom',
+    fontBody: "'Noto Naskh Arabic', serif",
+    fontHead: "'Noto Naskh Arabic', serif",
+    pageBg: '#faf7f0',
+    text: '#211c17',
+    chapterBg: '#1a4d3e',
+    chapterText: '#ffffff',
+    subText: '#7a2e2e',
+    subBorder: '#1a4d3e',
+    verseBg: '#f8f2e2',
+    verseBorder: '#c9a96a',
+    termColor: '#7a2e2e',
+    dotColor: '#b9ab8f',
+    swatch: ['#1a4d3e', '#7a2e2e', '#c9a96a'],
+    isCustom: true,
+  },
+};
+
+// Which color roles the custom-theme picker lets the user set, and the
+// font choices available for it (reusing the font stacks already loaded
+// for the preset themes, so no extra font files are ever fetched).
+export const CUSTOM_COLOR_KEYS = [
+  'pageBg', 'text', 'chapterBg', 'chapterText', 'subText', 'subBorder', 'verseBg', 'verseBorder', 'termColor',
+];
+
+export const CUSTOM_FONTS = {
+  'Noto Naskh Arabic': "'Noto Naskh Arabic', serif",
+  'Scheherazade New': "'Scheherazade New', serif",
+  'Noto Sans Arabic': "'Noto Sans Arabic', sans-serif",
+  'Amiri': "'Amiri', serif",
 };
 
 export const PAGE_SIZES = { A5: '420px', A4: '560px', Letter: '560px' };
+
+// Resolves the theme object actually used for rendering: presets as-is,
+// or the "custom" preset merged with the user's chosen colors/font.
+export function resolveTheme(themeKey, customColors, customFont) {
+  const base = THEMES[themeKey] || THEMES.emerald;
+  if (!base.isCustom) return base;
+  const font = CUSTOM_FONTS[customFont] || base.fontBody;
+  return {
+    ...base,
+    ...(customColors || {}),
+    fontBody: font,
+    fontHead: font,
+    dotColor: (customColors && customColors.verseBorder) || base.dotColor,
+  };
+}

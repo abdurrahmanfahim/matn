@@ -1,11 +1,11 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { THEMES, PAGE_SIZES } from '../lib/themes';
+import { PAGE_SIZES, resolveTheme } from '../lib/themes';
 import Paragraph from './Paragraph';
 
-export default function BookPreview({ doc, theme, dir, termMode, pageSize }) {
+export default function BookPreview({ doc, theme, dir, termMode, pageSize, customColors, customFont }) {
   const { t: tr } = useTranslation();
-  const t = THEMES[theme];
+  const t = resolveTheme(theme, customColors, customFont);
   const isEmpty = !doc.meta.title && doc.content.length === 0;
 
   const pageStyle = {

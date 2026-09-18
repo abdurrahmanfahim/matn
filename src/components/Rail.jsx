@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { THEMES } from '../lib/themes';
+import { THEMES, CUSTOM_COLOR_KEYS, CUSTOM_FONTS } from '../lib/themes';
 import { setLanguage } from '../i18n';
 
 function TogglePair({ options, value, onChange }) {
@@ -51,6 +51,8 @@ export default function Rail({
   numerals, setNumerals,
   termMode, setTermMode,
   pageSize, setPageSize,
+  customColors, setCustomColors,
+  customFont, setCustomFont,
   mobileOpen, onClose,
 }) {
   const { t, i18n } = useTranslation();
@@ -83,6 +85,29 @@ export default function Rail({
             />
           ))}
         </div>
+        {theme === 'custom' && (
+          <div className="custom-colors">
+            <select
+              className="custom-font-select"
+              value={customFont}
+              onChange={(e) => setCustomFont(e.target.value)}
+            >
+              {Object.keys(CUSTOM_FONTS).map((f) => (
+                <option key={f} value={f}>{f}</option>
+              ))}
+            </select>
+            {CUSTOM_COLOR_KEYS.map((key) => (
+              <div className="color-row" key={key}>
+                <span className="color-row-label">{t(`customColors.${key}`)}</span>
+                <input
+                  type="color"
+                  value={customColors[key]}
+                  onChange={(e) => setCustomColors({ ...customColors, [key]: e.target.value })}
+                />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="rail-section">

@@ -12,8 +12,10 @@ import EditorToolbar from './components/EditorToolbar';
 import OutlineModal from './components/OutlineModal';
 import { SAMPLE_AR, SAMPLE_EN } from './lib/sample';
 import { buildDocument } from './lib/parser';
+import { THEMES, CUSTOM_COLOR_KEYS } from './lib/themes';
 import { extractDocx, extractPdf, isDocx, isPdf } from './lib/fileExtract';
 import { buildStandaloneHtml } from './lib/exportHtml';
+import { buildEpub } from './lib/exportEpub';
 import {
   getAllBooks, getBook, getActiveBookId, setActiveBookId,
   createBook, updateBookText, updateBookSettings, deleteBook, migrateLegacyDraft,
@@ -30,6 +32,12 @@ function detectLang() {
   return 'en';
 }
 
+function defaultCustomColors() {
+  const c = {};
+  CUSTOM_COLOR_KEYS.forEach((k) => { c[k] = THEMES.custom[k]; });
+  return c;
+}
+
 function defaultSettingsFor(lang) {
   return {
     theme: 'emerald',
@@ -37,6 +45,8 @@ function defaultSettingsFor(lang) {
     numerals: lang === 'ar' ? 'arabic' : 'latin',
     termMode: 'auto',
     pageSize: 'A5',
+    customColors: defaultCustomColors(),
+    customFont: 'Noto Naskh Arabic',
   };
 }
 
@@ -84,6 +94,8 @@ export default function App() {
   const [numerals, setNumerals] = useState(initialSettings.numerals);
   const [termMode, setTermMode] = useState(initialSettings.termMode);
   const [pageSize, setPageSize] = useState(initialSettings.pageSize);
+  const [customColors, setCustomColors] = useState(initialSettings.customColors);
+  const [customFont, setCustomFont] = useState(initialSettings.customFont);
 
   const [guideOpen, setGuideOpen] = useState(false);
   const [jsonImportOpen, setJsonImportOpen] = useState(false);
@@ -120,9 +132,9 @@ export default function App() {
 
   // Autosave per-book settings.
   useEffect(() => {
-    updateBookSettings(activeBookId, { theme, dir, numerals, termMode, pageSize });
+    updateBookSettings(activeBookId, { theme, dir, numerals, termMode, pageSize, customColors, customFont });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [theme, dir, numerals, termMode, pageSize, activeBookId]);
+  }, [theme, dir, numerals, termMode, pageSize, customColors, customFont, activeBookId]);
 
   useEffect(() => {
     if ('serviceWorker' in navigator) {
@@ -182,6 +194,8 @@ export default function App() {
     setNumerals(settings.numerals);
     setTermMode(settings.termMode);
     setPageSize(settings.pageSize);
+    setCustomColors(settings.customColors);
+    setCustomFont(settings.customFont);
   }, [i18n.language]);
 
   const handlePrint = useCallback(() => window.print(), []);
@@ -209,7 +223,7 @@ export default function App() {
   useEffect(() => { handleDownloadMdRef.current = handleDownloadMd; }, [handleDownloadMd]);
 
   const handleDownloadHtml = useCallback(() => {
-    const html = buildStandaloneHtml(text, { theme, dir, numerals, termMode, pageSize });
+    const html = buildStandaloneHtml(text, { theme, dir, numerals, termMode, pageSize, customColors, customFont });
     const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -219,7 +233,23 @@ export default function App() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-  }, [text, theme, dir, numerals, termMode, pageSize]);
+  }, [text, theme, dir, numerals, termMode, pageSize, customColors, customFont]);
+
+  const handleDownloadEpub = useCallback(async () => {
+    try {
+      const blob = await buildEpub(doc, { theme, dir, termMode, customColors, customFont });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'book.epub';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      window.alert(t('topbar.epubError'));
+    }
+  }, [doc, theme, dir, termMode, customColors, customFont, t]);
 
   const wrapSelection = useCallback((marker) => {
     const el = editorRef.current;
@@ -395,6 +425,7 @@ export default function App() {
         onOpenPromptBuilder={() => setPromptBuilderOpen(true)}
         onDownloadMd={handleDownloadMd}
         onDownloadHtml={handleDownloadHtml}
+        onDownloadEpub={handleDownloadEpub}
         onClear={handleClear}
         onOpenSettings={() => setRailOpen(true)}
         onOpenLibrary={() => { refreshBooks(); setLibraryOpen(true); }}
@@ -410,6 +441,8 @@ export default function App() {
           numerals={numerals} setNumerals={setNumerals}
           termMode={termMode} setTermMode={setTermMode}
           pageSize={pageSize} setPageSize={setPageSize}
+          customColors={customColors} setCustomColors={setCustomColors}
+          customFont={customFont} setCustomFont={setCustomFont}
           mobileOpen={railOpen}
           onClose={() => setRailOpen(false)}
         />
@@ -467,6 +500,8 @@ export default function App() {
               dir={dir}
               termMode={termMode}
               pageSize={pageSize}
+              customColors={customColors}
+              customFont={customFont}
             />
           </div>
         </div>

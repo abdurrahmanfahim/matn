@@ -11,6 +11,9 @@
     "extractError": "تعذّرت قراءة هذا الملف. جرّب ملف .docx أو .pdf أو .md أو .txt.",
     "downloadMd": "تنزيل .md",
     "downloadHtml": "تنزيل HTML",
+    "downloadEpub": "تنزيل EPUB",
+    "export": "تصدير",
+    "epubError": "تعذّر إنشاء ملف EPUB. حاول مرة أخرى.",
     "find": "بحث",
     "outline": "المخطط",
     "clear": "مسح",
@@ -34,7 +37,19 @@
     "emerald": "زمردي — نسخ",
     "scheherazade": "شهرزاد — كلاسيكي",
     "sans": "حديث — بدون تشكيل",
-    "sepia": "عتيق — أميري"
+    "sepia": "عتيق — أميري",
+    "custom": "مخصّص"
+  },
+  "customColors": {
+    "pageBg": "خلفية الصفحة",
+    "text": "نص المتن",
+    "chapterBg": "صندوق الفصل",
+    "chapterText": "نص الفصل",
+    "subText": "نص العنوان الفرعي",
+    "subBorder": "حد العنوان الفرعي",
+    "verseBg": "صندوق الشعر",
+    "verseBorder": "حد صندوق الشعر",
+    "termColor": "تمييز المصطلح"
   },
   "editor": {
     "label": "النص المصدر (Markdown)",

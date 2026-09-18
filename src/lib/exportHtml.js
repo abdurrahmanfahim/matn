@@ -3,7 +3,7 @@
 // theme data as the live preview so the export matches exactly.
 
 import { buildDocument, splitTerm } from './parser';
-import { THEMES, PAGE_SIZES } from './themes';
+import { PAGE_SIZES, resolveTheme } from './themes';
 
 function escHtml(t) {
   return String(t)
@@ -33,9 +33,9 @@ const FONT_FAMILY_QUERY =
   '&family=Noto+Sans+Arabic:wght@400;500;600;700' +
   '&family=Amiri:ital,wght@0,400;0,700;1,400';
 
-export function buildStandaloneHtml(rawText, { theme, dir, numerals, termMode, pageSize }) {
+export function buildStandaloneHtml(rawText, { theme, dir, numerals, termMode, pageSize, customColors, customFont }) {
   const doc = buildDocument(rawText, { numerals });
-  const t = THEMES[theme];
+  const t = resolveTheme(theme, customColors, customFont);
 
   let body = '';
   if (doc.meta.title) {

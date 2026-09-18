@@ -1,10 +1,11 @@
 import React, { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { setLanguage } from '../i18n';
+import DropdownMenu from './DropdownMenu';
 
 export default function TopBar({
   onOpenGuide, onLoadSample, onFileUpload, onPrint,
-  onOpenJsonImport, onOpenPromptBuilder, onDownloadMd, onDownloadHtml, onClear, onOpenSettings, onOpenLibrary,
+  onOpenJsonImport, onOpenPromptBuilder, onDownloadMd, onDownloadHtml, onDownloadEpub, onClear, onOpenSettings, onOpenLibrary,
   onOpenFind, onOpenOutline, extracting,
 }) {
   const fileRef = useRef(null);
@@ -55,8 +56,11 @@ export default function TopBar({
         />
         <button className="btn" onClick={onOpenFind}>{t('topbar.find')}</button>
         <span className="tb-divider" />
-        <button className="btn" onClick={onDownloadMd}>{t('topbar.downloadMd')}</button>
-        <button className="btn" onClick={onDownloadHtml}>{t('topbar.downloadHtml')}</button>
+        <DropdownMenu label={t('topbar.export')}>
+          <button onClick={onDownloadMd}>{t('topbar.downloadMd')}</button>
+          <button onClick={onDownloadHtml}>{t('topbar.downloadHtml')}</button>
+          <button onClick={onDownloadEpub}>{t('topbar.downloadEpub')}</button>
+        </DropdownMenu>
         <button className="btn danger" onClick={onClear}>{t('topbar.clear')}</button>
         <button className="btn primary" onClick={onPrint}>{t('topbar.print')}</button>
       </div>
