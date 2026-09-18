@@ -56,7 +56,8 @@
     "empty": "Start typing in the editor to see your book take shape here.",
     "stats": "{{words}} words · ~{{pages}} pages",
     "tabEdit": "Edit",
-    "tabPreview": "Preview"
+    "tabPreview": "Preview",
+    "loading": "Loading editor…"
   },
   "toolbar": {
     "bold": "Bold",

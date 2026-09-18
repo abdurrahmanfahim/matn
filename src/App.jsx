@@ -10,6 +10,7 @@ import LibraryModal from './components/LibraryModal';
 import FindReplace from './components/FindReplace';
 import EditorToolbar from './components/EditorToolbar';
 import OutlineModal from './components/OutlineModal';
+const CodeEditor = React.lazy(() => import('./components/CodeEditor'));
 import { SAMPLE_AR, SAMPLE_EN } from './lib/sample';
 import { buildDocument } from './lib/parser';
 import { THEMES, CUSTOM_COLOR_KEYS } from './lib/themes';
@@ -162,10 +163,10 @@ export default function App() {
       } else if (e.key === 's' || e.key === 'S') {
         e.preventDefault();
         handleDownloadMdRef.current?.();
-      } else if ((e.key === 'b' || e.key === 'B') && document.activeElement === editorRef.current) {
+      } else if ((e.key === 'b' || e.key === 'B') && editorRef.current?.hasFocus) {
         e.preventDefault();
         wrapSelectionRef.current?.('**');
-      } else if ((e.key === 'i' || e.key === 'I') && document.activeElement === editorRef.current) {
+      } else if ((e.key === 'i' || e.key === 'I') && editorRef.current?.hasFocus) {
         e.preventDefault();
         wrapSelectionRef.current?.('*');
       }
@@ -256,14 +257,8 @@ export default function App() {
     if (!el) return;
     const start = el.selectionStart;
     const end = el.selectionEnd;
-    setText((prev) => {
-      const next = prev.slice(0, start) + marker + prev.slice(start, end) + marker + prev.slice(end);
-      requestAnimationFrame(() => {
-        el.focus();
-        el.setSelectionRange(start + marker.length, end + marker.length);
-      });
-      return next;
-    });
+    const selected = el.value.slice(start, end);
+    el.replaceRange(start, end, marker + selected + marker, start + marker.length, end + marker.length);
   }, []);
   useEffect(() => { wrapSelectionRef.current = wrapSelection; }, [wrapSelection]);
 
@@ -272,25 +267,22 @@ export default function App() {
     if (!el) return;
     const start = el.selectionStart;
     const end = el.selectionEnd;
-    setText((prev) => {
-      const lineStart = prev.lastIndexOf('\n', start - 1) + 1;
-      const hasSelection = end > start;
-      const insertion = prefix + (hasSelection ? '' : placeholder || '');
-      const next = prev.slice(0, lineStart) + insertion + prev.slice(lineStart);
-      requestAnimationFrame(() => {
-        el.focus();
-        if (hasSelection) {
-          el.setSelectionRange(lineStart + prefix.length, end + prefix.length);
-        } else if (placeholder) {
-          // select the placeholder so typing immediately replaces it
-          el.setSelectionRange(lineStart + prefix.length, lineStart + prefix.length + placeholder.length);
-        } else {
-          const cursorPos = lineStart + insertion.length;
-          el.setSelectionRange(cursorPos, cursorPos);
-        }
-      });
-      return next;
-    });
+    const current = el.value;
+    const lineStart = current.lastIndexOf('\n', start - 1) + 1;
+    const hasSelection = end > start;
+    const insertion = prefix + (hasSelection ? '' : placeholder || '');
+    if (hasSelection) {
+      el.replaceRange(lineStart, lineStart, prefix, lineStart + prefix.length, end + prefix.length);
+    } else if (placeholder) {
+      // select the placeholder so typing immediately replaces it
+      el.replaceRange(
+        lineStart, lineStart, insertion,
+        lineStart + prefix.length, lineStart + prefix.length + placeholder.length
+      );
+    } else {
+      const cursorPos = lineStart + insertion.length;
+      el.replaceRange(lineStart, lineStart, insertion, cursorPos, cursorPos);
+    }
   }, []);
 
   const insertVerse = useCallback(() => {
@@ -298,19 +290,12 @@ export default function App() {
     if (!el) return;
     const start = el.selectionStart;
     const end = el.selectionEnd;
-    setText((prev) => {
-      const selected = prev.slice(start, end);
-      const block = selected
-        ? selected.split('\n').map((l) => `> ${l}`).join('\n')
-        : '> ';
-      const next = prev.slice(0, start) + block + prev.slice(end);
-      const cursorPos = start + block.length;
-      requestAnimationFrame(() => {
-        el.focus();
-        el.setSelectionRange(cursorPos, cursorPos);
-      });
-      return next;
-    });
+    const selected = el.value.slice(start, end);
+    const block = selected
+      ? selected.split('\n').map((l) => `> ${l}`).join('\n')
+      : '> ';
+    const cursorPos = start + block.length;
+    el.replaceRange(start, end, block, cursorPos, cursorPos);
   }, []);
 
   const handleEditorScroll = useCallback(() => {
@@ -471,16 +456,18 @@ export default function App() {
               onSub={() => insertLinePrefix('## ', t('toolbar.subPlaceholder'))}
               onVerse={insertVerse}
             />
-            <textarea
-              id="editor"
-              ref={editorRef}
-              spellCheck={false}
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              onScroll={handleEditorScroll}
-              dir={dir}
-              style={{ textAlign: dir === 'rtl' ? 'right' : 'left' }}
-            />
+            <div className="cm-wrap">
+              <React.Suspense fallback={<div className="cm-loading">{t('editor.loading')}</div>}>
+                <CodeEditor
+                  ref={editorRef}
+                  value={text}
+                  onChange={(val) => setText(val)}
+                  onScroll={handleEditorScroll}
+                  dir={dir}
+                  spellCheck={false}
+                />
+              </React.Suspense>
+            </div>
             <FindReplace
               open={findReplaceOpen}
               onClose={() => setFindReplaceOpen(false)}

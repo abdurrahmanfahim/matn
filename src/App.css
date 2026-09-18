@@ -225,18 +225,25 @@ select {
   opacity: .8;
   white-space: nowrap;
 }
-#editor {
+.cm-wrap {
   flex: 1;
   width: 100%;
-  resize: none;
-  border: none;
-  outline: none;
-  background: #151210;
-  color: #d8cfc0;
-  font-family: 'SF Mono', 'Consolas', monospace;
-  font-size: 13px;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+}
+.cm-wrap .cm-editor {
+  position: absolute !important;
+  inset: 0 !important;
+  height: auto !important;
+}
+.cm-wrap .cm-line {
   line-height: 1.7;
+}
+.cm-loading {
   padding: 16px;
+  color: var(--parchment-dim);
+  font-size: 13px;
 }
 
 .editor-toolbar {
