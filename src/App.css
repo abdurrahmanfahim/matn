@@ -31,12 +31,18 @@ body {
   overflow: hidden;
 }
 
+/* =========================================================
+   BASE (mobile) — the default experience assumes a small,
+   touch-first screen. Desktop enhancements are layered on in
+   the min-width media query near the bottom of this file.
+   ========================================================= */
+
 /* ---- top bar ---- */
 .topbar {
   display: flex;
   align-items: center;
-  gap: 18px;
-  padding: 0 20px;
+  gap: 12px;
+  padding: 0 12px;
   height: 56px;
   flex: none;
   background: var(--ink-2);
@@ -50,10 +56,26 @@ body {
   color: var(--brass-bright);
   letter-spacing: 0.5px;
 }
-.brand .tagline { font-size: 11px; color: var(--parchment-dim); font-family: 'Inter', sans-serif; }
+.brand .tagline { display: none; font-size: 11px; color: var(--parchment-dim); font-family: 'Inter', sans-serif; }
 .topbar-spacer { flex: 1; }
-.top-actions { display: flex; gap: 8px; align-items: center; min-width: 0; }
+
+.top-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  min-width: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  flex: 1;
+}
+.top-actions::-webkit-scrollbar { display: none; }
+.top-actions .btn { flex: none; }
+
 .tb-divider { width: 1px; height: 20px; background: var(--ink-3); margin: 0 2px; flex: none; }
+
+.lang-btn.mobile-only { display: inline-block; }
+.icon-btn.mobile-only { display: inline-block; }
 
 .dropdown { position: relative; }
 .dropdown-caret { font-size: 9px; opacity: .7; }
@@ -101,17 +123,50 @@ body {
 .btn.primary { background: var(--brass); border-color: var(--brass); color: var(--ink); font-weight: 600; }
 .btn.primary:hover { background: var(--brass-bright); border-color: var(--brass-bright); color: var(--ink); }
 .btn.danger:hover { border-color: #d16a5a; color: #d16a5a; }
+.btn.small { padding: 5px 10px; font-size: 11.5px; }
 
 /* ---- layout: rail + editor + preview ---- */
-.workspace { flex: 1; display: flex; min-height: 0; }
-.rail {
-  width: var(--rail-w);
-  flex: none;
-  background: var(--ink-2);
-  border-left: 1px solid var(--ink-3);
-  padding: 18px 16px;
+.workspace { flex: 1; display: flex; min-height: 0; position: relative; }
+
+/* Rail is a hidden-by-default slide-in drawer on mobile, opened via the
+   gear icon in the top bar. Desktop turns it into a permanent inline
+   sidebar (see the min-width block below). */
+.rail { display: none; }
+.rail.mobile-open {
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  inset-block: 0;
+  inset-inline-end: 0;
+  width: min(85vw, 340px);
+  height: 100dvh;
+  z-index: 60;
   overflow-y: auto;
+  padding: 18px 16px 32px;
+  box-shadow: -8px 0 30px rgba(0,0,0,.5);
+  background: var(--ink-2);
+  border-inline-start: 1px solid var(--ink-3);
 }
+.rail-close-btn {
+  display: block;
+  align-self: flex-end;
+  margin-bottom: 14px;
+  background: transparent;
+  color: var(--parchment);
+  border: 1px solid var(--ink-3);
+  border-radius: 3px;
+  padding: 7px 13px;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+.rail-backdrop {
+  display: block;
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 8, 6, .6);
+  z-index: 55;
+}
+
 .rail h3 {
   font-size: 10.5px;
   text-transform: uppercase;
@@ -190,21 +245,39 @@ select {
 }
 .toggle-pair button.active { background: var(--brass); color: var(--ink); font-weight: 600; }
 
-.lang-btn.mobile-only { display: none; }
-.icon-btn.mobile-only { display: none; }
-.rail-close-btn { display: none; }
-.rail-backdrop { display: none; }
+/* ---- editor / preview: stacked with Edit/Preview tabs on mobile ---- */
+.panes { flex: 1; display: flex; flex-direction: column; min-width: 0; }
 
-/* ---- editor / preview split ---- */
-.panes { flex: 1; display: flex; min-width: 0; }
-.editor-pane {
-  width: 40%;
+.mobile-view-tabs {
+  display: flex;
   flex: none;
+  border-bottom: 1px solid var(--ink-3);
+}
+.mobile-view-tabs button {
+  flex: 1;
+  background: var(--ink-2);
+  color: var(--parchment-dim);
+  border: none;
+  padding: 10px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.mobile-view-tabs button.active {
+  color: var(--brass-bright);
+  box-shadow: inset 0 -2px 0 var(--brass-bright);
+}
+
+.editor-pane {
+  width: 100%;
+  height: auto;
+  flex: 1;
   display: flex;
   flex-direction: column;
-  border-left: 1px solid var(--ink-3);
-  min-width: 280px;
+  border-bottom: 1px solid var(--ink-3);
+  min-width: 0;
 }
+.editor-pane.mobile-hidden { display: none; }
 .editor-pane .pane-label {
   padding: 9px 16px;
   font-size: 10.5px;
@@ -269,8 +342,6 @@ select {
 .tb-btn.tb-wide { font-size: 11.5px; }
 .tb-sep { width: 1px; height: 18px; background: var(--ink-3); margin: 0 4px; }
 
-.mobile-view-tabs { display: none; }
-
 .find-replace-bar {
   flex: none;
   display: flex;
@@ -303,18 +374,20 @@ select {
   min-width: 0;
   overflow-y: auto;
   background: radial-gradient(circle at 50% 0%, #2a241d 0%, var(--ink) 70%);
-  padding: 36px 24px;
+  padding: 18px 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
+.preview-pane.mobile-hidden { display: none; }
+
 #book-page {
   background: var(--paper);
   max-width: 620px;
   width: 100%;
   min-height: 400px;
   box-shadow: 0 10px 40px rgba(0,0,0,.45), 0 2px 8px rgba(0,0,0,.3);
-  padding: 48px 44px;
+  padding: 28px 22px;
   border-radius: 2px;
   line-height: 2;
   font-size: 14.5px;
@@ -325,7 +398,7 @@ select {
 #book-page .bk-title-main {
   font-family: var(--font-head);
   font-weight: 700;
-  font-size: 30px;
+  font-size: 23px;
   color: var(--chapter-bg);
   margin-bottom: 10px;
 }
@@ -386,7 +459,7 @@ select {
   line-height: 1.95;
 }
 
-/* ---- format guide modal ---- */
+/* ---- format guide / json / prompt / library / outline modals ---- */
 .modal-backdrop {
   position: fixed; inset: 0;
   background: rgba(10,8,6,.7);
@@ -394,7 +467,7 @@ select {
   align-items: center;
   justify-content: center;
   z-index: 50;
-  padding: 30px;
+  padding: 16px;
 }
 .modal-backdrop.open { display: flex; }
 .modal {
@@ -405,9 +478,9 @@ select {
   width: 100%;
   max-height: 85vh;
   overflow-y: auto;
-  padding: 28px 30px;
+  padding: 20px 18px;
 }
-.modal h2 { color: var(--brass-bright); font-family: 'Amiri', serif; font-size: 22px; margin: 0 0 14px 0; }
+.modal h2 { color: var(--brass-bright); font-family: 'Amiri', serif; font-size: 20px; margin: 0 0 14px 0; }
 .modal h4 { color: var(--parchment); font-size: 14px; margin: 18px 0 6px 0; }
 .modal p, .modal li { color: var(--parchment-dim); font-size: 13px; line-height: 1.9; }
 .modal code {
@@ -433,8 +506,6 @@ select {
   white-space: pre-wrap;
 }
 .modal-header { display: flex; justify-content: space-between; align-items: flex-start; }
-
-.btn.small { padding: 5px 10px; font-size: 11.5px; }
 
 .library-list { display: flex; flex-direction: column; gap: 8px; }
 .library-row {
@@ -487,79 +558,60 @@ select {
   font-size: 12px;
 }
 
-/* ---- responsive ---- */
-@media (max-width: 880px) {
-  .rail { display: none; }
-  .lang-btn.mobile-only { display: inline-block; }
-  .icon-btn.mobile-only { display: inline-block; }
-  .brand .tagline { display: none; }
-  .top-actions {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    flex: 1;
-  }
-  .top-actions::-webkit-scrollbar { display: none; }
-  .top-actions .btn { flex: none; }
+/* =========================================================
+   DESKTOP ENHANCEMENTS — layered on top of the mobile base
+   above once there's enough width for a permanent sidebar and
+   a side-by-side editor/preview split.
+   ========================================================= */
+@media (min-width: 881px) {
+  .topbar { gap: 18px; padding: 0 20px; }
+  .brand .tagline { display: inline; }
+  .top-actions { overflow-x: visible; flex: none; }
 
-  .rail.mobile-open {
+  .lang-btn.mobile-only { display: none; }
+  .icon-btn.mobile-only { display: none; }
+
+  /* Rail becomes a permanent inline sidebar instead of a drawer —
+     these overrides also neutralize any leftover .mobile-open state
+     from a viewport resize while the drawer happened to be open. */
+  .rail {
     display: flex;
     flex-direction: column;
-    position: fixed;
-    inset-block: 0;
-    inset-inline-end: 0;
-    width: min(85vw, 340px);
-    height: 100dvh;
-    z-index: 60;
-    overflow-y: auto;
-    padding: 18px 16px 32px;
-    box-shadow: -8px 0 30px rgba(0,0,0,.5);
-  }
-  .rail-close-btn {
-    display: block;
-    align-self: flex-end;
-    margin-bottom: 14px;
-    background: transparent;
-    color: var(--parchment);
-    border: 1px solid var(--ink-3);
-    border-radius: 3px;
-    padding: 7px 13px;
-    font-size: 12.5px;
-    cursor: pointer;
-  }
-  .rail-backdrop {
-    display: block;
-    position: fixed;
-    inset: 0;
-    background: rgba(10, 8, 6, .6);
-    z-index: 55;
-  }
-
-  .panes { flex-direction: column; }
-  .mobile-view-tabs {
-    display: flex;
+    width: var(--rail-w);
     flex: none;
-    border-bottom: 1px solid var(--ink-3);
-  }
-  .mobile-view-tabs button {
-    flex: 1;
+    position: static;
+    inset: auto;
+    height: auto;
+    z-index: auto;
+    box-shadow: none;
     background: var(--ink-2);
-    color: var(--parchment-dim);
-    border: none;
-    padding: 10px;
-    font-size: 12.5px;
-    font-weight: 600;
-    cursor: pointer;
+    border-inline-start: 1px solid var(--ink-3);
+    padding: 18px 16px;
+    overflow-y: auto;
   }
-  .mobile-view-tabs button.active {
-    color: var(--brass-bright);
-    box-shadow: inset 0 -2px 0 var(--brass-bright);
+  .rail-close-btn { display: none; }
+  .rail-backdrop { display: none; }
+
+  .panes { flex-direction: row; }
+  .mobile-view-tabs { display: none; }
+
+  .editor-pane {
+    width: 40%;
+    height: auto;
+    flex: none;
+    border-inline-start: 1px solid var(--ink-3);
+    border-bottom: none;
+    min-width: 280px;
   }
-  .editor-pane { width: 100%; height: auto; flex: 1; border-left: none; border-bottom: 1px solid var(--ink-3); }
-  .preview-pane { padding: 18px 10px; flex: 1; }
-  .editor-pane.mobile-hidden, .preview-pane.mobile-hidden { display: none; }
-  #book-page { padding: 28px 22px; }
-  #book-page .bk-title-main { font-size: 23px; }
+  .editor-pane.mobile-hidden { display: flex; }
+  .preview-pane.mobile-hidden { display: flex; }
+  .preview-pane { padding: 36px 24px; }
+
+  #book-page { padding: 48px 44px; }
+  #book-page .bk-title-main { font-size: 30px; }
+
+  .modal { padding: 28px 30px; }
+  .modal h2 { font-size: 22px; }
 }
 
 /* ---- print ---- */
