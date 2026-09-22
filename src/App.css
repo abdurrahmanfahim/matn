@@ -508,6 +508,7 @@ select {
 .modal-header { display: flex; justify-content: space-between; align-items: flex-start; }
 
 .library-list { display: flex; flex-direction: column; gap: 8px; }
+.library-toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
 .library-row {
   display: flex;
   align-items: center;
@@ -518,7 +519,9 @@ select {
   border-radius: 4px;
   cursor: pointer;
   transition: border-color .15s;
+  flex-wrap: wrap;
 }
+.library-row-actions { display: flex; gap: 6px; flex: none; }
 .library-row:hover { border-color: var(--brass); }
 .library-row.active { border-color: var(--brass-bright); background: rgba(212, 172, 116, .06); }
 .library-row-info { min-width: 0; }

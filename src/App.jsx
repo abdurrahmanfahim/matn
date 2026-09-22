@@ -20,6 +20,7 @@ import { buildEpub } from './lib/exportEpub';
 import {
   getAllBooks, getBook, getActiveBookId, setActiveBookId,
   createBook, updateBookText, updateBookSettings, deleteBook, migrateLegacyDraft,
+  renameBook, duplicateBook,
 } from './lib/library';
 import './App.css';
 
@@ -138,12 +139,6 @@ export default function App() {
   }, [theme, dir, numerals, termMode, pageSize, customColors, customFont, activeBookId]);
 
   useEffect(() => {
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js').catch(() => {});
-    }
-  }, []);
-
-  useEffect(() => {
     const handleKey = (e) => {
       if (e.key === 'Escape') {
         setGuideOpen(false);
@@ -182,7 +177,13 @@ export default function App() {
       styleTag.id = 'print-page-size';
       document.head.appendChild(styleTag);
     }
-    styleTag.textContent = `@media print { @page { size: ${pageSize}; margin: 1.8cm; } }`;
+    styleTag.textContent = `@media print {
+      @page {
+        size: ${pageSize};
+        margin: 1.8cm;
+        @bottom-center { content: counter(page); }
+      }
+    }`;
   }, [pageSize]);
 
   const switchToBook = useCallback((book) => {
@@ -399,6 +400,16 @@ export default function App() {
     }
   }, [activeBookId, switchToBook, i18n.language, refreshBooks]);
 
+  const handleRenameBook = useCallback((id, title) => {
+    renameBook(id, title);
+    refreshBooks();
+  }, [refreshBooks]);
+
+  const handleDuplicateBook = useCallback((id, copySuffix) => {
+    duplicateBook(id, copySuffix);
+    refreshBooks();
+  }, [refreshBooks]);
+
   return (
     <div className="app-shell">
       <TopBar
@@ -508,6 +519,9 @@ export default function App() {
         onOpenBook={handleOpenBook}
         onDeleteBook={handleDeleteBook}
         onNewBook={handleNewBook}
+        onRenameBook={handleRenameBook}
+        onDuplicateBook={handleDuplicateBook}
+        onBooksRestored={refreshBooks}
       />
       <OutlineModal
         open={outlineOpen}

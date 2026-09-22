@@ -118,6 +118,14 @@
     "untitled": "Untitled Book",
     "current": "current",
     "delete": "Delete",
-    "deleteConfirm": "Delete this book permanently? This cannot be undone."
+    "deleteConfirm": "Delete this book permanently? This cannot be undone.",
+    "rename": "Rename",
+    "renamePrompt": "New title for this book:",
+    "duplicate": "Duplicate",
+    "copySuffix": "(copy)",
+    "backup": "Backup all",
+    "restore": "Restore",
+    "restoreSuccess": "Restored — {{added}} book(s) added.",
+    "restoreError": "Couldn't read that backup file."
   }
 }

@@ -91,7 +91,7 @@ export function updateBookText(id, text, fallbackTitle) {
   books[idx] = {
     ...books[idx],
     text,
-    title: deriveTitle(text, fallbackTitle),
+    title: books[idx].titlePinned ? books[idx].title : deriveTitle(text, fallbackTitle),
     updatedAt: Date.now(),
   };
   writeBooks(books);
@@ -113,6 +113,62 @@ export function deleteBook(id) {
   if (getActiveBookId() === id) {
     setActiveBookId(books.length ? books.sort((a, b) => b.updatedAt - a.updatedAt)[0].id : null);
   }
+}
+
+// Sets an explicit, user-chosen title that overrides the auto-derived
+// one from now on (persists across further text edits).
+export function renameBook(id, title) {
+  const books = readBooks();
+  const idx = books.findIndex((b) => b.id === id);
+  if (idx === -1) return null;
+  books[idx] = { ...books[idx], title, titlePinned: true, updatedAt: Date.now() };
+  writeBooks(books);
+  return books[idx];
+}
+
+export function duplicateBook(id, copySuffix) {
+  const books = readBooks();
+  const source = books.find((b) => b.id === id);
+  if (!source) return null;
+  const now = Date.now();
+  const copy = {
+    ...source,
+    id: makeId(),
+    title: `${source.title || ''} ${copySuffix}`.trim(),
+    createdAt: now,
+    updatedAt: now,
+  };
+  books.push(copy);
+  writeBooks(books);
+  return copy;
+}
+
+// Whole-library backup: every book as a single downloadable JSON blob,
+// since everything otherwise only lives in this browser's localStorage.
+export function exportAllBooksJson() {
+  return JSON.stringify({ warraqBackup: 1, exportedAt: Date.now(), books: readBooks() }, null, 2);
+}
+
+// Restores from a previously exported backup. mode 'merge' adds the
+// backed-up books alongside whatever is already here (skipping any
+// whose id already exists, so re-importing the same backup twice is
+// harmless); mode 'replace' wipes the current library first.
+export function importBooksJson(jsonString, mode) {
+  const parsed = JSON.parse(jsonString);
+  const incoming = Array.isArray(parsed) ? parsed : parsed.books;
+  if (!Array.isArray(incoming)) throw new Error('Not a valid Warraq backup file.');
+  const existing = mode === 'replace' ? [] : readBooks();
+  const existingIds = new Set(existing.map((b) => b.id));
+  let added = 0;
+  for (const b of incoming) {
+    if (!b || typeof b.text !== 'string') continue;
+    if (existingIds.has(b.id)) continue;
+    existing.push(b);
+    existingIds.add(b.id);
+    added++;
+  }
+  writeBooks(existing);
+  return { total: existing.length, added };
 }
 
 // One-time migration from the old single-draft storage (pre-library
