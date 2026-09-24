@@ -32,6 +32,9 @@
     "pageSizeA5": "A5 (small book)",
     "pageSizeA4": "A4",
     "pageSizeLetter": "Letter",
+    "fontSize": "Font Size",
+    "fontSizeSmaller": "Decrease font size",
+    "fontSizeLarger": "Increase font size",
     "language": "Language"
   },
   "themes": {

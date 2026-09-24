@@ -33,7 +33,7 @@ const FONT_FAMILY_QUERY =
   '&family=Noto+Sans+Arabic:wght@400;500;600;700' +
   '&family=Amiri:ital,wght@0,400;0,700;1,400';
 
-export function buildStandaloneHtml(rawText, { theme, dir, numerals, termMode, pageSize, customColors, customFont }) {
+export function buildStandaloneHtml(rawText, { theme, dir, numerals, termMode, pageSize, fontSize = 14.5, customColors, customFont }) {
   const doc = buildDocument(rawText, { numerals });
   const t = resolveTheme(theme, customColors, customFont);
 
@@ -92,7 +92,7 @@ export function buildStandaloneHtml(rawText, { theme, dir, numerals, termMode, p
     max-width: ${pageWidth};
     width: 100%;
     line-height: 2;
-    font-size: 14.5px;
+    font-size: ${fontSize}px;
     padding: 48px 44px;
     box-shadow: 0 10px 40px rgba(0,0,0,.45);
     border-radius: 2px;

@@ -250,6 +250,35 @@ select {
 }
 .toggle-pair button.active { background: var(--brass); color: var(--ink); font-weight: 600; }
 
+.font-size-stepper {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--ink-3);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.font-size-stepper button {
+  background: var(--ink);
+  color: var(--parchment);
+  border: none;
+  padding: 7px 0;
+  width: 40px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+}
+.font-size-stepper button:hover:not(:disabled) { background: var(--ink-3); color: var(--brass-bright); }
+.font-size-stepper button:disabled { opacity: .35; cursor: default; }
+.font-size-stepper span {
+  flex: 1;
+  text-align: center;
+  font-size: 12px;
+  color: var(--parchment-dim);
+  font-family: 'Inter', sans-serif;
+  border-inline: 1px solid var(--ink-3);
+}
+
 /* ---- editor / preview: stacked with Edit/Preview tabs on mobile ---- */
 .panes { flex: 1; display: flex; flex-direction: column; min-width: 0; }
 
@@ -396,7 +425,7 @@ select {
   padding: 28px 22px;
   border-radius: 2px;
   line-height: 2;
-  font-size: 14.5px;
+  font-size: var(--book-font-size, 14.5px);
 }
 
 /* ---- book content (theme-driven via CSS custom properties) ---- */
@@ -636,6 +665,18 @@ select {
     overflow: visible !important;
     background: #ffffff !important;
   }
+  /* The editor/preview split uses a `mobile-hidden` class to show only one
+     pane at a time on narrow screens (the desktop override that shows both
+     lives in a `min-width: 881px` query). Printing evaluates width-based
+     media queries against the page's physical size — which is narrower
+     than 881px for every standard paper size — so that desktop override
+     never applies here. Left alone, whenever the user is on the "Edit" tab
+     (the default state), .preview-pane keeps `display: none` straight
+     through printing and the output is a blank page. Force it visible
+     (and the editor pane hidden) regardless of which tab was active. */
+  .editor-pane { display: none !important; }
+  .preview-pane, .preview-pane.mobile-hidden { display: flex !important; }
+
   body * { visibility: hidden; }
   #book-page, #book-page * { visibility: visible; }
   #book-page {

@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { PAGE_SIZES, resolveTheme } from '../lib/themes';
 import Paragraph from './Paragraph';
 
-export default function BookPreview({ doc, theme, dir, termMode, pageSize, customColors, customFont }) {
+export default function BookPreview({ doc, theme, dir, termMode, pageSize, customColors, customFont, fontSize }) {
   const { t: tr } = useTranslation();
   const t = resolveTheme(theme, customColors, customFont);
   const isEmpty = !doc.meta.title && doc.content.length === 0;
@@ -15,6 +15,7 @@ export default function BookPreview({ doc, theme, dir, termMode, pageSize, custo
     direction: dir,
     textAlign: dir === 'rtl' ? 'right' : 'left',
     maxWidth: PAGE_SIZES[pageSize],
+    '--book-font-size': `${fontSize}px`,
     '--chapter-bg': t.chapterBg,
     '--chapter-text': t.chapterText,
     '--sub-text': t.subText,

@@ -32,6 +32,9 @@
     "pageSizeA5": "A5 (كتاب صغير)",
     "pageSizeA4": "A4",
     "pageSizeLetter": "Letter",
+    "fontSize": "حجم الخط",
+    "fontSizeSmaller": "تصغير الخط",
+    "fontSizeLarger": "تكبير الخط",
     "language": "اللغة"
   },
   "themes": {

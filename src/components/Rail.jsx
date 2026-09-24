@@ -45,12 +45,17 @@ function ThemeChip({ active, onSelect, swatch, name }) {
   );
 }
 
+const FONT_SIZE_MIN = 12;
+const FONT_SIZE_MAX = 20;
+const FONT_SIZE_STEP = 0.5;
+
 export default function Rail({
   theme, setTheme,
   dir, setDir,
   numerals, setNumerals,
   termMode, setTermMode,
   pageSize, setPageSize,
+  fontSize, setFontSize,
   customColors, setCustomColors,
   customFont, setCustomFont,
   mobileOpen, onClose,
@@ -135,6 +140,27 @@ export default function Rail({
           <option value="A4">{t('rail.pageSizeA4')}</option>
           <option value="Letter">{t('rail.pageSizeLetter')}</option>
         </select>
+      </div>
+
+      <div className="rail-section">
+        <h3>{t('rail.fontSize')}</h3>
+        <div className="font-size-stepper">
+          <button
+            onClick={() => setFontSize(Math.max(FONT_SIZE_MIN, +(fontSize - FONT_SIZE_STEP).toFixed(1)))}
+            disabled={fontSize <= FONT_SIZE_MIN}
+            aria-label={t('rail.fontSizeSmaller')}
+          >
+            A−
+          </button>
+          <span>{Math.round((fontSize / 14.5) * 100)}%</span>
+          <button
+            onClick={() => setFontSize(Math.min(FONT_SIZE_MAX, +(fontSize + FONT_SIZE_STEP).toFixed(1)))}
+            disabled={fontSize >= FONT_SIZE_MAX}
+            aria-label={t('rail.fontSizeLarger')}
+          >
+            A+
+          </button>
+        </div>
       </div>
 
       <div className="rail-section">

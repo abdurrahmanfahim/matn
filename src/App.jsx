@@ -47,6 +47,7 @@ function defaultSettingsFor(lang) {
     numerals: lang === 'ar' ? 'arabic' : 'latin',
     termMode: 'auto',
     pageSize: 'A5',
+    fontSize: 14.5,
     customColors: defaultCustomColors(),
     customFont: 'Noto Naskh Arabic',
   };
@@ -96,6 +97,7 @@ export default function App() {
   const [numerals, setNumerals] = useState(initialSettings.numerals);
   const [termMode, setTermMode] = useState(initialSettings.termMode);
   const [pageSize, setPageSize] = useState(initialSettings.pageSize);
+  const [fontSize, setFontSize] = useState(initialSettings.fontSize);
   const [customColors, setCustomColors] = useState(initialSettings.customColors);
   const [customFont, setCustomFont] = useState(initialSettings.customFont);
 
@@ -134,9 +136,9 @@ export default function App() {
 
   // Autosave per-book settings.
   useEffect(() => {
-    updateBookSettings(activeBookId, { theme, dir, numerals, termMode, pageSize, customColors, customFont });
+    updateBookSettings(activeBookId, { theme, dir, numerals, termMode, pageSize, fontSize, customColors, customFont });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [theme, dir, numerals, termMode, pageSize, customColors, customFont, activeBookId]);
+  }, [theme, dir, numerals, termMode, pageSize, fontSize, customColors, customFont, activeBookId]);
 
   useEffect(() => {
     const handleKey = (e) => {
@@ -196,6 +198,7 @@ export default function App() {
     setNumerals(settings.numerals);
     setTermMode(settings.termMode);
     setPageSize(settings.pageSize);
+    setFontSize(settings.fontSize);
     setCustomColors(settings.customColors);
     setCustomFont(settings.customFont);
   }, [i18n.language]);
@@ -225,7 +228,7 @@ export default function App() {
   useEffect(() => { handleDownloadMdRef.current = handleDownloadMd; }, [handleDownloadMd]);
 
   const handleDownloadHtml = useCallback(() => {
-    const html = buildStandaloneHtml(text, { theme, dir, numerals, termMode, pageSize, customColors, customFont });
+    const html = buildStandaloneHtml(text, { theme, dir, numerals, termMode, pageSize, fontSize, customColors, customFont });
     const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -235,7 +238,7 @@ export default function App() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-  }, [text, theme, dir, numerals, termMode, pageSize, customColors, customFont]);
+  }, [text, theme, dir, numerals, termMode, pageSize, fontSize, customColors, customFont]);
 
   const handleDownloadEpub = useCallback(async () => {
     try {
@@ -437,6 +440,7 @@ export default function App() {
           numerals={numerals} setNumerals={setNumerals}
           termMode={termMode} setTermMode={setTermMode}
           pageSize={pageSize} setPageSize={setPageSize}
+          fontSize={fontSize} setFontSize={setFontSize}
           customColors={customColors} setCustomColors={setCustomColors}
           customFont={customFont} setCustomFont={setCustomFont}
           mobileOpen={railOpen}
@@ -498,6 +502,7 @@ export default function App() {
               dir={dir}
               termMode={termMode}
               pageSize={pageSize}
+              fontSize={fontSize}
               customColors={customColors}
               customFont={customFont}
             />
