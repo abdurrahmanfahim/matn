@@ -41,8 +41,8 @@ body {
 .topbar {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 0 12px;
+  gap: 8px;
+  padding: 0 8px;
   height: 56px;
   flex: none;
   background: var(--ink-2);
@@ -57,11 +57,14 @@ body {
   letter-spacing: 0.5px;
 }
 .brand .tagline { display: none; font-size: 11px; color: var(--parchment-dim); font-family: 'Inter', sans-serif; }
-.topbar-spacer { flex: 1; }
+/* On mobile the spacer shouldn't compete with .top-actions for the scarce
+   remaining width — it only exists to push actions away from the brand
+   once there's room to spare, which is a desktop-only luxury (see below). */
+.topbar-spacer { flex: none; width: 0; }
 
 .top-actions {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   align-items: center;
   min-width: 0;
   overflow-x: auto;
@@ -71,6 +74,8 @@ body {
 }
 .top-actions::-webkit-scrollbar { display: none; }
 .top-actions .btn { flex: none; }
+.desktop-only { display: none; }
+.dropdown.mobile-only { display: inline-flex; }
 
 .tb-divider { width: 1px; height: 20px; background: var(--ink-3); margin: 0 2px; flex: none; }
 
@@ -80,9 +85,8 @@ body {
 .dropdown { position: relative; }
 .dropdown-caret { font-size: 9px; opacity: .7; }
 .dropdown-menu {
-  position: absolute;
-  top: calc(100% + 6px);
-  inset-inline-end: 0;
+  /* position/top/right are set inline per-instance in DropdownMenu.jsx,
+     via `position: fixed` — see that file for why. */
   background: var(--ink-2);
   border: 1px solid var(--ink-3);
   border-radius: 4px;
@@ -93,7 +97,7 @@ body {
   display: flex;
   flex-direction: column;
 }
-.dropdown-menu button {
+.dropdown-menu button, .dropdown-menu label {
   background: transparent;
   color: var(--parchment);
   border: none;
@@ -104,7 +108,7 @@ body {
   border-radius: 3px;
   font-family: 'Inter', sans-serif;
 }
-.dropdown-menu button:hover { background: var(--ink); }
+.dropdown-menu button:hover, .dropdown-menu label:hover { background: var(--ink); }
 
 .btn {
   font-family: 'Inter', sans-serif;
@@ -124,6 +128,7 @@ body {
 .btn.primary:hover { background: var(--brass-bright); border-color: var(--brass-bright); color: var(--ink); }
 .btn.danger:hover { border-color: #d16a5a; color: #d16a5a; }
 .btn.small { padding: 5px 10px; font-size: 11.5px; }
+.icon-btn { padding: 7px 9px; font-size: 14px; line-height: 1; }
 
 /* ---- layout: rail + editor + preview ---- */
 .workspace { flex: 1; display: flex; min-height: 0; position: relative; }
@@ -386,6 +391,7 @@ select {
   max-width: 620px;
   width: 100%;
   min-height: 400px;
+  flex-shrink: 0;
   box-shadow: 0 10px 40px rgba(0,0,0,.45), 0 2px 8px rgba(0,0,0,.3);
   padding: 28px 22px;
   border-radius: 2px;
@@ -569,10 +575,16 @@ select {
 @media (min-width: 881px) {
   .topbar { gap: 18px; padding: 0 20px; }
   .brand .tagline { display: inline; }
+  .topbar-spacer { flex: 1; width: auto; }
   .top-actions { overflow-x: visible; flex: none; }
 
   .lang-btn.mobile-only { display: none; }
   .icon-btn.mobile-only { display: none; }
+  .dropdown.mobile-only { display: none; }
+
+  .desktop-only { display: inline-flex; }
+  .tb-divider.desktop-only { display: block; }
+  label.desktop-only { display: inline-block; }
 
   /* Rail becomes a permanent inline sidebar instead of a drawer —
      these overrides also neutralize any leftover .mobile-open state

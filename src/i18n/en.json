@@ -18,7 +18,8 @@
     "outline": "Outline",
     "clear": "Clear",
     "clearConfirm": "Clear the whole editor and start over? This cannot be undone.",
-    "print": "Export PDF"
+    "print": "Export PDF",
+    "more": "More"
   },
   "rail": {
     "formatting": "Formatting",
