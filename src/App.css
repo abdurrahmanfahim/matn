@@ -619,15 +619,22 @@ select {
 
 /* ---- print ---- */
 @media print {
-  html, body { background: #ffffff !important; }
+  html, body, #root, .app-shell, .workspace, .panes, .preview-pane {
+    height: auto !important;
+    overflow: visible !important;
+    background: #ffffff !important;
+  }
   body * { visibility: hidden; }
   #book-page, #book-page * { visibility: visible; }
   #book-page {
-    position: absolute; inset: 0;
+    position: absolute; top: 0; left: 0; right: 0;
     box-shadow: none !important;
     max-width: none !important;
     width: 100% !important;
     padding: 0;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    color-adjust: exact;
   }
   #book-page .bk-chapter { break-after: avoid; page-break-before: always; }
   .bk-title + .bk-chapter { page-break-before: auto; }
