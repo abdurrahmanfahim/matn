@@ -1,5 +1,8 @@
 {
-  "brand": { "mark": "Warraq", "tagline": "From Text to Book" },
+  "brand": {
+    "mark": "Warraq",
+    "tagline": "From Text to Book"
+  },
   "topbar": {
     "library": "My Books",
     "guide": "Text Format",
@@ -13,6 +16,7 @@
     "downloadHtml": "Download HTML",
     "downloadEpub": "Download EPUB",
     "export": "Export",
+    "printLayoutMenu": "PDF Layout…",
     "epubError": "Couldn't build the EPUB file. Please try again.",
     "find": "Find",
     "outline": "Outline",
@@ -131,5 +135,20 @@
     "restore": "Restore",
     "restoreSuccess": "Restored — {{added}} book(s) added.",
     "restoreError": "Couldn't read that backup file."
+  },
+  "printLayout": {
+    "title": "PDF Layout",
+    "normal": "Normal",
+    "normalDesc": "One page per sheet — the standard layout.",
+    "landscape": "Landscape spread",
+    "landscapeDesc": "Two pages side by side on a landscape sheet, like an open book.",
+    "fourup": "4-up",
+    "fourupDesc": "Four pages arranged on one sheet, two rows of two.",
+    "booklet": "Booklet",
+    "bookletDesc": "Pages reordered and laid out two-per-sheet so that after printing double-sided, folding, and stapling down the middle, they read in the right order.",
+    "generate": "Generate PDF",
+    "generating": "Generating…",
+    "generatingProgress": "Rendering page {{done}} of {{total}}…",
+    "error": "Couldn't build the PDF. Please try again."
   }
 }

@@ -10,6 +10,7 @@ import LibraryModal from './components/LibraryModal';
 import FindReplace from './components/FindReplace';
 import EditorToolbar from './components/EditorToolbar';
 import OutlineModal from './components/OutlineModal';
+import PrintLayoutModal from './components/PrintLayoutModal';
 const CodeEditor = React.lazy(() => import('./components/CodeEditor'));
 import { SAMPLE_AR, SAMPLE_EN } from './lib/sample';
 import { buildDocument } from './lib/parser';
@@ -110,6 +111,7 @@ export default function App() {
   const [extracting, setExtracting] = useState(false);
   const [findReplaceOpen, setFindReplaceOpen] = useState(false);
   const [outlineOpen, setOutlineOpen] = useState(false);
+  const [printLayoutOpen, setPrintLayoutOpen] = useState(false);
   const [mobileView, setMobileView] = useState('edit');
   const editorRef = useRef(null);
   const previewRef = useRef(null);
@@ -430,6 +432,7 @@ export default function App() {
         onOpenLibrary={() => { refreshBooks(); setLibraryOpen(true); }}
         onOpenFind={() => setFindReplaceOpen(true)}
         onOpenOutline={() => setOutlineOpen(true)}
+        onOpenPrintLayout={() => setPrintLayoutOpen(true)}
         extracting={extracting}
       />
       <div className="workspace">
@@ -533,6 +536,12 @@ export default function App() {
         onClose={() => setOutlineOpen(false)}
         toc={doc.toc}
         onJump={handleJumpToSection}
+      />
+      <PrintLayoutModal
+        open={printLayoutOpen}
+        onClose={() => setPrintLayoutOpen(false)}
+        getBookPageEl={() => previewRef.current?.querySelector('#book-page')}
+        pageSize={pageSize}
       />
     </div>
   );

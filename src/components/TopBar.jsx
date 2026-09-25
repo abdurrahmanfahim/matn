@@ -6,7 +6,7 @@ import DropdownMenu from './DropdownMenu';
 export default function TopBar({
   onOpenGuide, onLoadSample, onFileUpload, onPrint,
   onOpenJsonImport, onOpenPromptBuilder, onDownloadMd, onDownloadHtml, onDownloadEpub, onClear, onOpenSettings, onOpenLibrary,
-  onOpenFind, onOpenOutline, extracting,
+  onOpenFind, onOpenOutline, onOpenPrintLayout, extracting,
 }) {
   const fileRef = useRef(null);
   const { t, i18n } = useTranslation();
@@ -71,6 +71,7 @@ export default function TopBar({
           <button onClick={onDownloadMd}>{t('topbar.downloadMd')}</button>
           <button onClick={onDownloadHtml}>{t('topbar.downloadHtml')}</button>
           <button onClick={onDownloadEpub}>{t('topbar.downloadEpub')}</button>
+          <button onClick={onOpenPrintLayout}>{t('topbar.printLayoutMenu')}</button>
         </DropdownMenu>
         <button className="btn danger desktop-only" onClick={onClear}>{t('topbar.clear')}</button>
 
@@ -99,6 +100,7 @@ export default function TopBar({
           <button onClick={onDownloadMd}>{t('topbar.downloadMd')}</button>
           <button onClick={onDownloadHtml}>{t('topbar.downloadHtml')}</button>
           <button onClick={onDownloadEpub}>{t('topbar.downloadEpub')}</button>
+          <button onClick={onOpenPrintLayout}>{t('topbar.printLayoutMenu')}</button>
           <button onClick={onClear}>{t('topbar.clear')}</button>
         </DropdownMenu>
       </div>
