@@ -38,12 +38,35 @@ function px(pt) {
 // Creates a detached container that picks up the app's #book-page CSS
 // rules (theme colors, chapter/verse/toc styling) by reusing that ID —
 // it's never visible and never coexists with user interaction.
+//
+// Two things this deliberately avoids, both found by testing against a
+// real render rather than assumed safe:
+//   - Positioning it miles off-screen (e.g. `left: -99999px`). html2canvas
+//     clones the target into its own offscreen iframe to render it, and
+//     with very large negative offsets it misjudged that iframe's width —
+//     the captured canvas came out with the correct height but roughly
+//     half the intended width, which then got force-stretched to fit the
+//     PDF page and showed up as visibly distorted (squashed/elongated)
+//     text, in both Arabic and English content.
+//   - Hiding it via a zero-size `overflow: hidden` wrapper. The element's
+//     own layout box still measures correctly in the live DOM either way
+//     (confirmed directly), but html2canvas's own render pass respects
+//     that ancestor clipping when rasterizing, silently cutting off
+//     content past the wrapper's bounds — a blank/transparent region
+//     that then renders solid black once exported as JPEG (no alpha
+//     channel to fall back to).
+// Plain `top: 0; left: 0` with a deeply negative z-index sidesteps both:
+// the element sits at a normal, non-extreme position, and is hidden
+// simply because the app's own opaque UI paints over it — no clipping or
+// offset trickery for html2canvas's cloning to misinterpret.
 function makePageShell(widthPx, heightPx) {
   const el = document.createElement('div');
   el.id = 'book-page';
   el.style.position = 'fixed';
-  el.style.left = '-99999px';
   el.style.top = '0';
+  el.style.left = '0';
+  el.style.zIndex = '-9999';
+  el.style.pointerEvents = 'none';
   el.style.margin = '0';
   el.style.maxWidth = 'none';
   el.style.width = `${widthPx}px`;
@@ -56,12 +79,28 @@ function makePageShell(widthPx, heightPx) {
   return el;
 }
 
+function removePageShell(el) {
+  el.remove();
+}
+
 // Copies every inline style (theme background/color/font/direction plus
 // the --chapter-bg/--verse-bg/etc. custom properties) from the live
 // #book-page onto a shell, so rasterized pages match the preview exactly.
+//
+// Explicitly skips box-sizing properties (max-width chief among them: the
+// live preview sets max-width to the on-screen page-size value, e.g.
+// 420px for A5). Copying it verbatim used to silently override the
+// shell's own explicit width right after makePageShell had set it,
+// capping every render at ~420px regardless of the physical page size —
+// which is why the previous fix (correctly sizing the output canvas via
+// html2canvas's width/windowWidth options) still left the un-rendered
+// remainder of the canvas blank, showing up as a solid black band once
+// exported as JPEG (no alpha channel to fall back to).
+const SKIP_COPY_PROPS = new Set(['max-width', 'width', 'height', 'min-height', 'min-width']);
 function copyThemeVars(source, target) {
   for (let i = 0; i < source.style.length; i++) {
     const prop = source.style[i];
+    if (SKIP_COPY_PROPS.has(prop)) continue;
     target.style.setProperty(prop, source.style.getPropertyValue(prop));
   }
 }
@@ -94,7 +133,7 @@ async function paginate(liveBookPage, contentWidthPx, contentHeightPx) {
     used += h;
   }
 
-  document.body.removeChild(measure);
+  removePageShell(measure);
   return pages.filter((p) => p.length > 0);
 }
 
@@ -105,8 +144,17 @@ async function renderPageCanvas(html2canvas, nodes, liveBookPage, widthPx, heigh
   shell.style.boxSizing = 'border-box';
   for (const n of nodes) shell.appendChild(n.cloneNode(true));
 
-  const canvas = await html2canvas(shell, { scale: 1, backgroundColor: null, useCORS: true, logging: false });
-  document.body.removeChild(shell);
+  const canvas = await html2canvas(shell, {
+    scale: 1,
+    width: widthPx,
+    height: heightPx,
+    windowWidth: widthPx,
+    windowHeight: heightPx,
+    backgroundColor: null,
+    useCORS: true,
+    logging: false,
+  });
+  removePageShell(shell);
   return canvas;
 }
 
@@ -205,7 +253,28 @@ export async function buildImpositionPdf(liveBookPage, { pageSize = 'A5', layout
       const canvas = canvases[slot.page];
       if (!canvas) continue;
       const imgData = canvas.toDataURL('image/jpeg', 0.92);
-      pdf.addImage(imgData, 'JPEG', slot.x, slot.y, wPt, hPt);
+      // Defensive: fit the actual captured aspect ratio into the slot
+      // instead of blindly force-stretching to wPt x hPt. Both should
+      // already match closely — but if some future change (a new theme
+      // property, a very wide unbreakable element) throws that off again,
+      // this degrades to a slightly smaller centered image rather than
+      // silently stretching text into illegible shapes.
+      const canvasRatio = canvas.width / canvas.height;
+      const slotRatio = wPt / hPt;
+      let drawW = wPt;
+      let drawH = hPt;
+      let offX = 0;
+      let offY = 0;
+      if (Math.abs(canvasRatio - slotRatio) / slotRatio > 0.02) {
+        if (canvasRatio > slotRatio) {
+          drawH = wPt / canvasRatio;
+          offY = (hPt - drawH) / 2;
+        } else {
+          drawW = hPt * canvasRatio;
+          offX = (wPt - drawW) / 2;
+        }
+      }
+      pdf.addImage(imgData, 'JPEG', slot.x + offX, slot.y + offY, drawW, drawH);
     }
   }
 
